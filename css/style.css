@@ -44,8 +44,24 @@ section {
   background-color: rgb(33, 38, 45);
 }
 
-.adress-list {
+.addr-list {
   list-style: none;
+}
 
+.addr-listitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addr-listitem--paragraph {
   font-size: 0.9rem;
+}
+
+.addr-listitem--button {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: rgb(255, 0, 0);
 }

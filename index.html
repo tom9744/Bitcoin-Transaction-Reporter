@@ -7,6 +7,7 @@
   <link rel="stylesheet" type="text/css" href="./css/reset.css"> 
   <link rel="stylesheet" type="text/css" href="./css/style.css"> 
   <script type="module" src="./js/app.js" defer></script>
+  <script type="module" src="./js/address.js" defer></script>
   <title>Artemis Lim</title>
 </head>
 <body>
@@ -19,16 +20,7 @@
     </section>
 
     <section>
-      <ul class="adress-list">
-        <li class="adress-list--listitem">
-          0xa75F9C8246f7269279bE4c969e7Bc6Eb619cC204
-        </li>
-        <li class="adress-list--listitem">
-          0xa75F9C8246f7269279bE4c969e7Bc6Eb619cC204
-        </li>
-        <li class="adress-list--listitem">
-          0xa75F9C8246f7269279bE4c969e7Bc6Eb619cC204
-        </li>
+      <ul class="addr-list">
       </ul>
     </section>
 
@@ -36,5 +28,12 @@
       <template class="report"></template>
     </section>
   </div>
+
+  <template id="addr-list-item">
+    <li class="addr-listitem">
+      <p class="addr-listitem--paragraph"></p>
+      <button class="addr-listitem--button">𝗫</button>
+    </li>
+  </template>
 </body>
 </html>
