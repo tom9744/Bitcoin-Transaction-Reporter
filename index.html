@@ -6,34 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="./css/reset.css"> 
   <link rel="stylesheet" type="text/css" href="./css/style.css"> 
+  <link rel="stylesheet" type="text/css" href="./css/wallet.css"> 
   <script type="module" src="./dist/app.js" defer></script>
   <script type="module" src="./dist/address.js" defer></script>
   <title>Artemis Lim</title>
 </head>
 <body>
   <div class="container">
-    <section>
-      <form class="form">
-        <input class="form--input" type="text">
-        <button class="form--button">등록</button>
+    <section class="wallet">
+      <form class="wallet--form">
+        <input class="wallet--input" type="text">
+        <button class="wallet--button__add">등록</button>
       </form>
-    </section>
 
-    <section>
-      <ul class="addr-list">
+      <ul class="wallet--list">
       </ul>
+
+      <!-- Wallet Listitem Template -->
+      <template id="wallet--listitem">
+        <li class="wallet--listitem">
+          <p class="wallet--paragraph"></p>
+          <button class="wallet--button__remove">𝗫</button>
+        </li>
+      </template>
     </section>
 
-    <section>
-      <template class="report"></template>
+    <section class="report">
+      <button class="report--button">보고서 받기</button>
+      <template id="report">
+
+      </template>
     </section>
   </div>
 
-  <template id="addr-list-item">
-    <li class="addr-listitem">
-      <p class="addr-listitem--paragraph"></p>
-      <button class="addr-listitem--button">𝗫</button>
-    </li>
-  </template>
+
 </body>
 </html>

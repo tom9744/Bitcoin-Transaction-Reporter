@@ -14,6 +14,10 @@ type ParsedRecord = {
   parsedDate: Date
 }
 
+type Report = {
+  [prop: string]: number 
+};
+
 export default class TransactionReporter {
   private baseUrl = "https://api.etherscan.io/api";
   private apiKey = "12ZSBIZUKUNEX6IEZWMBQ1TCFT3PPMV9RE";
@@ -90,7 +94,7 @@ export default class TransactionReporter {
     return groupedRecords;
   }
 
-  public getReport(address: string) {
+  private getReport(address: string) {
     return fetch(`${this.baseUrl}?module=account&action=tokentx&address=${address}&startblock=0&endblock=999999999&sort=${this.sortingMethod}&apikey=${this.apiKey}`)
     .then(response => {
       if (!response.ok) {
@@ -130,5 +134,32 @@ export default class TransactionReporter {
       // TODO: 보다 강인한 에러 처리
       alert(error);
     });
+  }
+
+  public async getFullReport(addresses: string[]) {
+    console.log("[SYSTEM] Started Loading Transaction Data...");
+      
+    const startTime = new Date().getTime();
+    const fullReport: {
+      [prop: string]: Array<{ address: string, report: Report }>
+    } = {};
+
+    // 순차적 비동기 처리
+    for (const address of addresses) {
+      const report = await this.getReport(address);
+
+      if (!report) { continue }
+      
+      Object.keys(report).forEach(date => {
+        !fullReport[date]
+          ? fullReport[date] = [ { address: address, report: report[date] } ]
+          : fullReport[date].push({ address: address, report: report[date] });
+      });
+    }
+    const endTime = new Date().getTime();
+
+    console.log(`총 수행시간: ${endTime - startTime}ms`);
+
+    return fullReport;
   }
 }

@@ -9,59 +9,11 @@
   background-color: rgb(13, 17, 23);
 }
 
-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+.report {
   width: 100%;
 }
 
-.form {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin: 1rem 0rem;
-  width: 100%;
-}
-
-.form--input {
-  height: 1.75rem;
-  width: 50%;
-  margin: 0px 16px;
-}
-
-.form--button {
-  border: 1px solid rgb(48, 54, 61);
-  border-radius: 8px;
-  outline: none;
-
-  height: 2.25rem;
-  width: 4rem;  
-
-  color: rgb(201, 209, 217);
-  background-color: rgb(33, 38, 45);
-}
-
-.addr-list {
-  list-style: none;
-}
-
-.addr-listitem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.addr-listitem--paragraph {
-  font-size: 0.9rem;
-}
-
-.addr-listitem--button {
-  border: none;
-  outline: none;
-  background-color: transparent;
-  cursor: pointer;
-  color: rgb(255, 0, 0);
+.report--button {
+  display: block;
+  margin: auto;
 }

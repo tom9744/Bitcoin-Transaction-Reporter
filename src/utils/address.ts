@@ -1,10 +1,10 @@
 const ADDRESS_REGEX = /[a-zA-Z0-9]/gi;
 
-const inputElem = document.querySelector(".form--input")! as HTMLInputElement;
-const registerButton = document.querySelector(".form--button")! as HTMLFormElement;
-const removeButton = document.querySelectorAll(".addr-listitem--button")! as NodeListOf<HTMLButtonElement>;
-const listElem = document.querySelector(".addr-list")! as HTMLLIElement;
-const liTemplate = document.querySelector("#addr-list-item")! as HTMLTemplateElement;
+const inputElem = document.querySelector(".wallet--input")! as HTMLInputElement;
+const registerButton = document.querySelector(".wallet--button__add")! as HTMLFormElement;
+const removeButton = document.querySelectorAll(".wallet--button__remove")! as NodeListOf<HTMLButtonElement>;
+const listElem = document.querySelector(".wallet--list")! as HTMLLIElement;
+const liTemplate = document.querySelector("#wallet--listitem")! as HTMLTemplateElement;
 
 const init = function () {
   const fromLocalStorage = localStorage.getItem("addressList") || "[]"; 

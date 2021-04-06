@@ -1,0 +1,59 @@
+.wallet {
+  width: 100%;
+
+  margin: 1rem 0rem;
+}
+
+.wallet--form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  margin-bottom: .5rem;
+}
+
+.wallet--input {
+  height: 1.75rem;
+  width: 50%;
+  margin: 0px 16px;
+}
+
+.wallet--button__add {
+  border: 1px solid rgb(48, 54, 61);
+  border-radius: 8px;
+  outline: none;
+
+  height: 2.25rem;
+  width: 4rem;  
+
+  color: rgb(201, 209, 217);
+  background-color: rgb(33, 38, 45);
+}
+
+.wallet--list {
+  list-style: none;
+
+  width: 50%;
+
+  margin: auto;
+}
+
+.wallet--listitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wallet--paragraph {
+  font-size: 0.9rem;
+}
+
+.wallet--button__remove {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: rgb(255, 0, 0);
+}
