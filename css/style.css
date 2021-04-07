@@ -1,19 +1,81 @@
+:root {
+  --primary-color:rgb(33, 38, 45);
+  --accent-color:rgb(48, 54, 61);
+  --text-color:rgb(201, 209, 217);
+  --backgroud-color: rgb(13, 17, 23);
+}
+
 .container {
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   min-width: 780px;
 
   padding: 40px 160px;
 
-  color: rgb(201, 209, 217);
-  background-color: rgb(13, 17, 23);
+  color: var(--text-color);
+  background-color: var(--backgroud-color);
 }
 
 .report {
   width: 100%;
+
+  margin-top: 4rem;
+
+  text-align: center;
+}
+
+.report--notice {
+  display: block;
+
+  width: 100%;
+  margin: 1rem 0;
 }
 
 .report--button {
-  display: block;
-  margin: auto;
+  border: 1px solid rgb(48, 54, 61);
+  border-radius: 8px;
+  outline: none;
+
+  height: 2.5rem;
+  width: 10rem;
+  
+  font-size: 1.1rem;
+  font-weight: bold;
+
+  color: rgb(201, 209, 217);
+  background-color: rgb(33, 38, 45);
+
+  cursor: pointer;
+}
+
+.app-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.app-table, .app-table--head, .app-table--body__even, .app-table--body__odd {
+  border: 2px solid var(--accent-color);
+}
+
+.app-table--head, .app-table--body__even, .app-table--body__odd{
+  padding: 1rem;
+}
+
+.app-table--head {
+  height: 2.5rem;
+
+  background-color: var(--primary-color);
+}
+
+.app-table--body__even, .app-table--body__odd {
+  height: 2rem;
+}
+
+.app-table--body__even {
+  
+} 
+
+.app-table--body__odd {
+  background-color: var(--primary-color);
 }

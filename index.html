@@ -33,26 +33,56 @@
 
     <!-- 보고서 내용 -->
     <section class="report">
-      <em>새로고침 하시면 보고서가 초기화됩니다...!</em>
       <button class="report--button">보고서 받기</button>
 
+      <em class="report--notice">새로고침 하시면 보고서가 초기화됩니다...!</em>
+
       <table
+        class="app-table"
         width="50%"
         height="200"
         cellspacing="5"
         border="1"
       >
-        <caption>표 제목</caption>
+        <!-- <caption>표 제목</caption> -->
+
         <thead>
             <tr align="center">
-                <th>날짜</th>
-                <th>지갑</th>
-                <th>코인</th>
-                <th>거래량</th>
+                <th class="app-table--head" style="width:10%">날짜</th>
+                <th class="app-table--head" style="width:50%">지갑</th>
+                <th class="app-table--head" style="width:20%">코인</th>
+                <th class="app-table--head" style="width:20%">거래량</th>
             </tr>
         </thead>
 
-        <tbody id="tbody">
+        <tbody id="tbody" class="table--body">
+          <!-- <tr>
+            <td class="app-table--body" rowspan="5">2020/04/41</td>
+            <td class="app-table--body" rowspan="3">0xc03845b1C9b43EE10393a9Cf5F05548922D3C282</td>
+            <td class="app-table--body">WETH</td>
+            <td class="app-table--body">20000</td>
+          </tr>
+
+          <tr>
+            <td>MINA</td>
+            <td>300</td>
+          </tr>
+
+          <tr>
+            <td>코인</td>
+            <td>거래량</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2">0x0e99489cbA652a55B729516F53721FEFAE62EEd4</td>
+            <td>코인</td>
+            <td>거래량</td>
+          </tr>
+
+          <tr>
+            <td>코인</td>
+            <td>거래량</td>
+          </tr> -->
         </tbody>
       </table>
 

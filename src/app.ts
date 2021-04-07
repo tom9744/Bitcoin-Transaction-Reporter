@@ -19,7 +19,7 @@ const makeTable = function(fullReport: FullReport) {
 
       return num2 - num1;
     })
-    .forEach(date => {
+    .forEach((date, index) => {
       const dates: HTMLTableDataCellElement[] = [];
       const addresses: HTMLTableDataCellElement[] = [];
       const tokens: HTMLTableDataCellElement[] = [];
@@ -37,8 +37,10 @@ const makeTable = function(fullReport: FullReport) {
           
           const tokenTd = document.createElement("td");
           tokenTd.textContent = tokenSymbol;
+          tokenTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
           const amountTd = document.createElement("td");
           amountTd.textContent = balanceChange + "";
+          amountTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
 
           tokens.push(tokenTd);
           amounts.push(amountTd);
@@ -48,6 +50,7 @@ const makeTable = function(fullReport: FullReport) {
         const addressTd = document.createElement("td");
         addressTd.textContent = address;
         addressTd.setAttribute("rowspan", count + "");
+        addressTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
 
         addresses.push(addressTd);
       }
@@ -56,6 +59,7 @@ const makeTable = function(fullReport: FullReport) {
       const th = document.createElement("th");
       th.textContent = date;
       th.setAttribute("rowspan", fullReport[date].count + "");
+      th.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
 
       dates.push(th);
 

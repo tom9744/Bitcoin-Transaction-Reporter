@@ -12,7 +12,7 @@ var makeTable = function (fullReport) {
         var num2 = +dateB.split("/").join("");
         return num2 - num1;
     })
-        .forEach(function (date) {
+        .forEach(function (date, index) {
         var dates = [];
         var addresses = [];
         var tokens = [];
@@ -27,19 +27,23 @@ var makeTable = function (fullReport) {
                 var _a = Object.entries(change)[0], tokenSymbol = _a[0], balanceChange = _a[1];
                 var tokenTd = document.createElement("td");
                 tokenTd.textContent = tokenSymbol;
+                tokenTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
                 var amountTd = document.createElement("td");
                 amountTd.textContent = balanceChange + "";
+                amountTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
                 tokens.push(tokenTd);
                 amounts.push(amountTd);
             });
             var addressTd = document.createElement("td");
             addressTd.textContent = address;
             addressTd.setAttribute("rowspan", count + "");
+            addressTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
             addresses.push(addressTd);
         }
         var th = document.createElement("th");
         th.textContent = date;
         th.setAttribute("rowspan", fullReport[date].count + "");
+        th.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
         dates.push(th);
         tableRows.push([dates, addresses, tokens, amounts]);
     });
