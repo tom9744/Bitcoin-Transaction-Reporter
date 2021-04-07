@@ -1,11 +1,6 @@
 import TransactionReporter from "./utils/transaction.js";
 import WalletManager from "./utils/address.js";
-// import { Report } from "./@types/types.js"
-
-interface DailyTokenReport { 
-  count: number,
-  changes: Array<{ [tokenSymbol: string]: number }> 
-}
+import { FullReport } from "./@types/types.js"
 
 new WalletManager();
 const reporter = TransactionReporter.getInstance("desc");
@@ -13,66 +8,59 @@ const reporter = TransactionReporter.getInstance("desc");
 const tableBodyElem = document.querySelector("#tbody")! as HTMLTableSectionElement
 const generateButton = document.querySelector(".report--button")! as HTMLButtonElement;
 
-const makeTable = function(fullReport: {
-  [date: string]: {
-      address: string;
-      report: DailyTokenReport;
-  }[];
-}) {
-
-  console.log(fullReport);
-  
+const makeTable = function(fullReport: FullReport) {
   const tableRows: HTMLTableDataCellElement[][][] = [];
-  
-  Object.keys(fullReport).forEach(date => {
-    const dates: HTMLTableDataCellElement[] = [];
-    const addresses: HTMLTableDataCellElement[] = [];
-    const tokens: HTMLTableDataCellElement[] = [];
-    const amounts: HTMLTableDataCellElement[] = [];
 
-    let globalCount = 0;
+  // [중요] key 값을 '숫자'로 변환하여 정렬하여야 제대로 정렬된다.
+  Object.keys(fullReport)
+    .sort((dateA, dateB) => {
+      const num1 = +dateA.split("/").join("");
+      const num2 = +dateB.split("/").join("");
 
-    // 단일 일자에 대한 
-    for (const { address, report } of fullReport[date]) {
-      const { count, changes } = report;
+      return num2 - num1;
+    })
+    .forEach(date => {
+      const dates: HTMLTableDataCellElement[] = [];
+      const addresses: HTMLTableDataCellElement[] = [];
+      const tokens: HTMLTableDataCellElement[] = [];
+      const amounts: HTMLTableDataCellElement[] = [];
 
-      if (count === 0) {
-        continue;
+      // 단일 일자에 대한 
+      for (const { address, report } of fullReport[date].reports) {
+        const { count, changes } = report;
+
+        if (count === 0) { continue; }
+
+        // 코인 이름과 거래량에 대한 테이블 데이터 셀을 생성한다.
+        changes.forEach(change => {
+          const [ tokenSymbol, balanceChange ] = Object.entries(change)[0];
+          
+          const tokenTd = document.createElement("td");
+          tokenTd.textContent = tokenSymbol;
+          const amountTd = document.createElement("td");
+          amountTd.textContent = balanceChange + "";
+
+          tokens.push(tokenTd);
+          amounts.push(amountTd);
+        })
+
+        // 지갑 주소에 대한 테이블 데이터 셀을 생성한다.
+        const addressTd = document.createElement("td");
+        addressTd.textContent = address;
+        addressTd.setAttribute("rowspan", count + "");
+
+        addresses.push(addressTd);
       }
 
-      // 
-      changes.forEach(change => {
-        const [ tokenSymbol, balanceChange ] = Object.entries(change)[0];
-        
-        const tokenTd = document.createElement("td");
-        tokenTd.textContent = tokenSymbol;
-        const amountTd = document.createElement("td");
-        amountTd.textContent = balanceChange + "";
+      // 거래일에 대한 테이블 데이터 셀을 생성한다.
+      const th = document.createElement("th");
+      th.textContent = date;
+      th.setAttribute("rowspan", fullReport[date].count + "");
 
-        tokens.push(tokenTd);
-        amounts.push(amountTd);
+      dates.push(th);
 
-        globalCount++;
-      })
-
-      // 지갑 주소
-      const addressTd = document.createElement("td");
-      addressTd.textContent = address;
-      addressTd.setAttribute("rowspan", count + "");
-
-      addresses.push(addressTd);
-    }
-
-    // 거래일
-    const th = document.createElement("th");
-    th.textContent = date;
-    th.setAttribute("rowspan", globalCount + "");
-
-    dates.push(th);
-
-    const reulst = [dates, addresses, tokens, amounts];
-    tableRows.push(reulst);
-  })    
+      tableRows.push([dates, addresses, tokens, amounts]);
+    }); 
 
   return tableRows;
 }
@@ -89,7 +77,6 @@ const generateReportHandler = function(): void {
       
       addrs.forEach(addr => {
         chunkLength.push(+addr.getAttribute("rowspan")!);
-
       })
 
       let count = 0;

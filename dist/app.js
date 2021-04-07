@@ -5,15 +5,19 @@ var reporter = TransactionReporter.getInstance("desc");
 var tableBodyElem = document.querySelector("#tbody");
 var generateButton = document.querySelector(".report--button");
 var makeTable = function (fullReport) {
-    console.log(fullReport);
     var tableRows = [];
-    Object.keys(fullReport).forEach(function (date) {
+    Object.keys(fullReport)
+        .sort(function (dateA, dateB) {
+        var num1 = +dateA.split("/").join("");
+        var num2 = +dateB.split("/").join("");
+        return num2 - num1;
+    })
+        .forEach(function (date) {
         var dates = [];
         var addresses = [];
         var tokens = [];
         var amounts = [];
-        var globalCount = 0;
-        for (var _i = 0, _a = fullReport[date]; _i < _a.length; _i++) {
+        for (var _i = 0, _a = fullReport[date].reports; _i < _a.length; _i++) {
             var _b = _a[_i], address = _b.address, report = _b.report;
             var count = report.count, changes = report.changes;
             if (count === 0) {
@@ -27,7 +31,6 @@ var makeTable = function (fullReport) {
                 amountTd.textContent = balanceChange + "";
                 tokens.push(tokenTd);
                 amounts.push(amountTd);
-                globalCount++;
             });
             var addressTd = document.createElement("td");
             addressTd.textContent = address;
@@ -36,10 +39,9 @@ var makeTable = function (fullReport) {
         }
         var th = document.createElement("th");
         th.textContent = date;
-        th.setAttribute("rowspan", globalCount + "");
+        th.setAttribute("rowspan", fullReport[date].count + "");
         dates.push(th);
-        var reulst = [dates, addresses, tokens, amounts];
-        tableRows.push(reulst);
+        tableRows.push([dates, addresses, tokens, amounts]);
     });
     return tableRows;
 };

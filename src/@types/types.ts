@@ -15,3 +15,15 @@ export interface ParsedRecord {
 export interface Report {
   [prop: string]: number 
 };
+
+export interface DailyTokenReport { 
+  count: number,
+  changes: Array<{ [tokenSymbol: string]: number }> 
+}
+
+export interface FullReport {
+  [date: string]: {
+    count: number,
+    reports: Array<{ address: string, report: DailyTokenReport }>
+  } 
+}

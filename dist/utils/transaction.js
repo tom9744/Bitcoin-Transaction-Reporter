@@ -74,9 +74,9 @@ var TransactionReporter = (function () {
             var year = record.parsedDate.getFullYear();
             var month = record.parsedDate.getMonth() + 1;
             var date = record.parsedDate.getDate();
-            !acc[year + "/" + month + "/" + date]
-                ? acc[year + "/" + month + "/" + date] = [__assign({}, record)]
-                : acc[year + "/" + month + "/" + date].push(__assign({}, record));
+            !acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)]
+                ? acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)] = [__assign({}, record)]
+                : acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)].push(__assign({}, record));
             return acc;
         }, {});
         return groupedRecords;
@@ -91,6 +91,21 @@ var TransactionReporter = (function () {
             return acc;
         }, {});
         return groupedRecords;
+    };
+    TransactionReporter.prototype.getDailyReport = function (dailyTokenTransferHistory) {
+        var transferPerToken = {
+            count: Object.keys(dailyTokenTransferHistory).length,
+            changes: []
+        };
+        Object.keys(dailyTokenTransferHistory).forEach(function (token) {
+            var _a;
+            var transfer = dailyTokenTransferHistory[token].reduce(function (acc, _a) {
+                var parsedValue = _a.parsedValue;
+                return acc + parsedValue;
+            }, 0);
+            transferPerToken.changes.push((_a = {}, _a[token] = transfer, _a));
+        });
+        return transferPerToken;
     };
     TransactionReporter.prototype.getReport = function (address) {
         var _this = this;
@@ -115,23 +130,11 @@ var TransactionReporter = (function () {
             return recordGroupedByDateAndToken;
         })
             .then(function (grupedByDateAndToken) {
-            var balanceChangePerDate = {};
+            var report = {};
             Object.keys(grupedByDateAndToken).forEach(function (date) {
-                var balanceChangePerToken = {
-                    count: Object.keys(grupedByDateAndToken[date]).length,
-                    changes: []
-                };
-                Object.keys(grupedByDateAndToken[date]).forEach(function (token) {
-                    var _a;
-                    var balanceChange = grupedByDateAndToken[date][token].reduce(function (acc, _a) {
-                        var parsedValue = _a.parsedValue;
-                        return acc + parsedValue;
-                    }, 0);
-                    balanceChangePerToken.changes.push((_a = {}, _a[token] = balanceChange, _a));
-                });
-                balanceChangePerDate[date] = balanceChangePerToken;
+                report[date] = _this.getDailyReport(grupedByDateAndToken[date]);
             });
-            return balanceChangePerDate;
+            return report;
         })
             .catch(function (error) {
             alert(error);
@@ -143,8 +146,8 @@ var TransactionReporter = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log("[SYSTEM] Started Loading Transaction Data...");
                         startTime = new Date().getTime();
+                        console.log("[SYSTEM] Started Loading Transaction Data...");
                         fullReport = {};
                         _loop_1 = function (address) {
                             var report;
@@ -157,9 +160,16 @@ var TransactionReporter = (function () {
                                             return [2, "continue"];
                                         }
                                         Object.keys(report).forEach(function (date) {
-                                            !fullReport[date]
-                                                ? fullReport[date] = [{ address: address, report: report[date] }]
-                                                : fullReport[date].push({ address: address, report: report[date] });
+                                            if (!fullReport[date]) {
+                                                fullReport[date] = {
+                                                    count: report[date].count,
+                                                    reports: [{ address: address, report: report[date] }]
+                                                };
+                                            }
+                                            else {
+                                                fullReport[date].count += report[date].count;
+                                                fullReport[date].reports.push({ address: address, report: report[date] });
+                                            }
                                         });
                                         return [2];
                                 }
@@ -179,6 +189,7 @@ var TransactionReporter = (function () {
                         _i++;
                         return [3, 1];
                     case 4:
+                        console.log(fullReport);
                         endTime = new Date().getTime();
                         console.log("\uCD1D \uC218\uD589\uC2DC\uAC04: " + (endTime - startTime) + "ms");
                         return [2, fullReport];

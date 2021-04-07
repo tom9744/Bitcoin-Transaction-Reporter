@@ -1,14 +1,5 @@
 import { parseValue, parseDate } from "./parser.js";
-import { Record, ParsedRecord } from "../@types/types.js"
-
-interface DailyTokenReport { 
-  count: number,
-  changes: Array<{ [tokenSymbol: string]: number }> 
-}
-
-// interface FullReport { 
-//   [date: string]: DailyTokenReport
-// }
+import { Record, ParsedRecord, DailyTokenReport, FullReport } from "../@types/types.js"
 
 export default class TransactionReporter {
   private baseUrl = "https://api.etherscan.io/api";
@@ -57,9 +48,9 @@ export default class TransactionReporter {
       const month = record.parsedDate.getMonth() + 1;
       const date = record.parsedDate.getDate();
       
-      !acc[`${year}/${month}/${date}`] 
-        ? acc[`${year}/${month}/${date}`] = [{ ...record }]
-        : acc[`${year}/${month}/${date}`].push({  ...record });
+      !acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`] 
+        ? acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`] = [{ ...record }]
+        : acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`].push({  ...record });
 
     return acc;
     }, {});
@@ -86,6 +77,22 @@ export default class TransactionReporter {
     return groupedRecords;
   }
 
+  private getDailyReport(dailyTokenTransferHistory: { [tokenSymbol: string]: ParsedRecord[] }) {
+    const transferPerToken: DailyTokenReport = { 
+      count: Object.keys(dailyTokenTransferHistory).length,  // 해당 일자에 거래된 코인의 가지수
+      changes: []
+    };
+
+    // 당일 거래된 코인에 대해, 입금/출금액을 모두 더해 최종 거래량을 산출한다.
+    Object.keys(dailyTokenTransferHistory).forEach(token => {
+      const transfer = dailyTokenTransferHistory[token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
+
+      transferPerToken.changes.push({ [token]: transfer });
+    });
+
+    return transferPerToken;
+  }
+
   private getReport(address: string) {
     return fetch(`${this.baseUrl}?module=account&action=tokentx&address=${address}&startblock=0&endblock=999999999&sort=${this.sortingMethod}&apikey=${this.apiKey}`)
     .then(response => {
@@ -108,27 +115,15 @@ export default class TransactionReporter {
     })
     // 단일 지갑에서 하루동안 거래된 코인들의 최종 거래량을 구한다.
     .then(grupedByDateAndToken => {
-      const balanceChangePerDate: { [date: string]: DailyTokenReport } = {};
+      const report: { [date: string]: DailyTokenReport } = {};
 
       // 일자별 거래 내역에 대해 다음의 로직을 수행한다.
       Object.keys(grupedByDateAndToken).forEach(date => {
-        const balanceChangePerToken: DailyTokenReport = { 
-          count: Object.keys(grupedByDateAndToken[date]).length,  // 해당 일자에 거래된 코인의 가지수
-          changes: []
-        };
-
-        // 당일 거래된 코인에 대해, 입금/출금액을 모두 더해 최종 거래량을 산출한다.
-        Object.keys(grupedByDateAndToken[date]).forEach(token => {
-          const balanceChange = grupedByDateAndToken[date][token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
-
-          balanceChangePerToken.changes.push({ [token]: balanceChange });
-        });
-
         // 당일 거래된 코인들에 대한 최종 거래량 산출 결과를 종합 보고서에 추가한다. 
-        balanceChangePerDate[date] = balanceChangePerToken;
+        report[date] = this.getDailyReport(grupedByDateAndToken[date]);
       });
 
-      return balanceChangePerDate;
+      return report;
     })
     .catch(error => {
       // TODO: 보다 강인한 에러 처리
@@ -137,25 +132,36 @@ export default class TransactionReporter {
   }
 
   public async getFullReport(addresses: string[]) {
-    console.log("[SYSTEM] Started Loading Transaction Data...");
-      
     const startTime = new Date().getTime();
-    const fullReport: { [prop: string]: Array<{ address: string, report: DailyTokenReport }> } = {};
+    console.log("[SYSTEM] Started Loading Transaction Data...");
+    
+    const fullReport: FullReport = {};
 
-    // 순차적 비동기 처리
+    // [순차적 비동기 처리] 지갑 주소 각각에 대한 보고서를 생성하고, 종합 보고서 객체를 생성한다.
     for (const address of addresses) {
       const report = await this.getReport(address);
 
       if (!report) { continue; }
       
+      // 단일 보고서를 하나의 종합 보고서에 병합한다.
       Object.keys(report).forEach(date => {
-        !fullReport[date]
-          ? fullReport[date] = [ { address: address, report: report[date] } ]
-          : fullReport[date].push({ address: address, report: report[date] });
+        if (!fullReport[date]) {
+          fullReport[date] = {
+            count: report[date].count,
+            reports: [ { address: address, report: report[date] } ]
+          }
+        }
+        else {
+          fullReport[date].count += report[date].count;
+          fullReport[date].reports.push({ address: address, report: report[date] });
+        }
       });
     }
-    const endTime = new Date().getTime();
 
+    console.log(fullReport);
+    
+
+    const endTime = new Date().getTime();
     console.log(`총 수행시간: ${endTime - startTime}ms`);
 
     return fullReport;
