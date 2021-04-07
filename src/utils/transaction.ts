@@ -1,22 +1,14 @@
 import { parseValue, parseDate } from "./parser.js";
+import { Record, ParsedRecord } from "../@types/types.js"
 
-type Record = {
-  value: string,
-  timeStamp: string,
-  from: string,
-  tokenDecimal: string,
-  tokenSymbol: string,
+interface DailyTokenReport { 
+  count: number,
+  changes: Array<{ [tokenSymbol: string]: number }> 
 }
 
-type ParsedRecord = {
-  parsedValue: number,
-  tokenSymbol: string, 
-  parsedDate: Date
-}
-
-type Report = {
-  [prop: string]: number 
-};
+// interface FullReport { 
+//   [date: string]: DailyTokenReport
+// }
 
 export default class TransactionReporter {
   private baseUrl = "https://api.etherscan.io/api";
@@ -57,10 +49,10 @@ export default class TransactionReporter {
   /**
    * 주어진 Records를 Date 별로 묶어, 객체 형태로 반환한다.
    * @param {Object} records 
-   * @returns 
+   * @returns YYYY/MM/DD 형태의 문자열을 key로 가지는 객체 
    */
   private groupByDate(records: Array<ParsedRecord>) {
-    const groupedRecords = records.reduce((acc: { [prop: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
+    const groupedRecords = records.reduce((acc: { [date: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
       const year = record.parsedDate.getFullYear();
       const month = record.parsedDate.getMonth() + 1;
       const date = record.parsedDate.getDate();
@@ -78,10 +70,10 @@ export default class TransactionReporter {
   /**
    * 주어진 Records를 Token 별로 묶어, 객체 형태로 반환한다.
    * @param {Object} records 
-   * @returns 
+   * @returns tokenSymbol을 key로 가지는 객체
    */
   private groupByToken(records: Array<ParsedRecord>) {
-    const groupedRecords = records.reduce((acc: { [prop: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
+    const groupedRecords = records.reduce((acc: { [tokenSymbol: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
       if(record.tokenSymbol !== "") {
         !acc[record.tokenSymbol] 
         ? acc[record.tokenSymbol] = [record]
@@ -105,30 +97,38 @@ export default class TransactionReporter {
     })
     .then(({ result: records }) => this.simplify(records, address))
     .then(parsedRecords => this.groupByDate(parsedRecords))
-    .then(recordByDate => {
-      const recordByDateAndToken: { [props: string] : { [prop: string] : Array<ParsedRecord> } } = {};
+    .then(recordGroupedByDate => {
+      const recordGroupedByDateAndToken: { [date: string] : { [tokenSymbol: string] : Array<ParsedRecord> } } = {};
       
-      // key는 YYYY/MM/DD 형태의 문자열.
-      Object.keys(recordByDate).forEach((key: string) => {
-        recordByDateAndToken[key] = this.groupByToken(recordByDate[key]);
+      Object.keys(recordGroupedByDate).forEach((date: string) => {
+        recordGroupedByDateAndToken[date] = this.groupByToken(recordGroupedByDate[date]);
       });
 
-      return recordByDateAndToken;
+      return recordGroupedByDateAndToken;
     })
-    .then(recordByDateAndToken => {
-      const balanceChangeByDate: { [props: string]: { [props: string]: number } } = {};
+    // 단일 지갑에서 하루동안 거래된 코인들의 최종 거래량을 구한다.
+    .then(grupedByDateAndToken => {
+      const balanceChangePerDate: { [date: string]: DailyTokenReport } = {};
 
-      Object.keys(recordByDateAndToken).forEach(date => {
-        const balanceChangeByToken: { [props: string]: number } = {};
+      // 일자별 거래 내역에 대해 다음의 로직을 수행한다.
+      Object.keys(grupedByDateAndToken).forEach(date => {
+        const balanceChangePerToken: DailyTokenReport = { 
+          count: Object.keys(grupedByDateAndToken[date]).length,  // 해당 일자에 거래된 코인의 가지수
+          changes: []
+        };
 
-        Object.keys(recordByDateAndToken[date]).forEach(token => {
-          balanceChangeByToken[token] = recordByDateAndToken[date][token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
+        // 당일 거래된 코인에 대해, 입금/출금액을 모두 더해 최종 거래량을 산출한다.
+        Object.keys(grupedByDateAndToken[date]).forEach(token => {
+          const balanceChange = grupedByDateAndToken[date][token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
+
+          balanceChangePerToken.changes.push({ [token]: balanceChange });
         });
 
-        balanceChangeByDate[date] = balanceChangeByToken;
+        // 당일 거래된 코인들에 대한 최종 거래량 산출 결과를 종합 보고서에 추가한다. 
+        balanceChangePerDate[date] = balanceChangePerToken;
       });
-      
-      return balanceChangeByDate;
+
+      return balanceChangePerDate;
     })
     .catch(error => {
       // TODO: 보다 강인한 에러 처리
@@ -140,15 +140,13 @@ export default class TransactionReporter {
     console.log("[SYSTEM] Started Loading Transaction Data...");
       
     const startTime = new Date().getTime();
-    const fullReport: {
-      [prop: string]: Array<{ address: string, report: Report }>
-    } = {};
+    const fullReport: { [prop: string]: Array<{ address: string, report: DailyTokenReport }> } = {};
 
     // 순차적 비동기 처리
     for (const address of addresses) {
       const report = await this.getReport(address);
 
-      if (!report) { continue }
+      if (!report) { continue; }
       
       Object.keys(report).forEach(date => {
         !fullReport[date]

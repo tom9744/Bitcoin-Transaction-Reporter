@@ -8,11 +8,11 @@
   <link rel="stylesheet" type="text/css" href="./css/style.css"> 
   <link rel="stylesheet" type="text/css" href="./css/wallet.css"> 
   <script type="module" src="./dist/app.js" defer></script>
-  <script type="module" src="./dist/address.js" defer></script>
   <title>Artemis Lim</title>
 </head>
 <body>
   <div class="container">
+    <!-- 지갑주소 추가/제거 기능 -->
     <section class="wallet">
       <form class="wallet--form">
         <input class="wallet--input" type="text">
@@ -31,14 +31,35 @@
       </template>
     </section>
 
+    <!-- 보고서 내용 -->
     <section class="report">
+      <em>새로고침 하시면 보고서가 초기화됩니다...!</em>
       <button class="report--button">보고서 받기</button>
+
+      <table
+        width="50%"
+        height="200"
+        cellspacing="5"
+        border="1"
+      >
+        <caption>표 제목</caption>
+        <thead>
+            <tr align="center">
+                <th>날짜</th>
+                <th>지갑</th>
+                <th>코인</th>
+                <th>거래량</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+        </tbody>
+      </table>
+
       <template id="report">
 
       </template>
     </section>
   </div>
-
-
 </body>
 </html>

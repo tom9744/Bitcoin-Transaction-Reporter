@@ -1,67 +1,84 @@
 const ADDRESS_REGEX = /[a-zA-Z0-9]/gi;
 
-const inputElem = document.querySelector(".wallet--input")! as HTMLInputElement;
-const registerButton = document.querySelector(".wallet--button__add")! as HTMLFormElement;
-const removeButton = document.querySelectorAll(".wallet--button__remove")! as NodeListOf<HTMLButtonElement>;
-const listElem = document.querySelector(".wallet--list")! as HTMLLIElement;
-const liTemplate = document.querySelector("#wallet--listitem")! as HTMLTemplateElement;
+export default class WalletManager {
+  private inputElem: HTMLInputElement;
+  private listElem: HTMLLIElement;
+  private listTemplate: HTMLTemplateElement;
+  private addButtonElem: HTMLButtonElement;
 
-const init = function () {
-  const fromLocalStorage = localStorage.getItem("addressList") || "[]"; 
+  private addressList: string[] = [];
 
-  addressList = JSON.parse(fromLocalStorage);
-  
-  for (let address of addressList) {
-    addAddressListItem(address);
+  constructor () {
+    this.inputElem = document.querySelector(".wallet--input")! as HTMLInputElement;
+    this.listElem = document.querySelector(".wallet--list")! as HTMLLIElement;
+    this.listTemplate = document.querySelector("#wallet--listitem")! as HTMLTemplateElement;
+    this.addButtonElem = document.querySelector(".wallet--button__add")! as HTMLButtonElement;
+
+    this.init();
   }
-}
 
-const addAddressListItem = function (address: string) {
-  const li = document.importNode(liTemplate.content, true);
-  const para = li.querySelector("p")! as HTMLParagraphElement;
-  para.textContent = address;
-  listElem.appendChild(li);
-}
+  /**
+   * LocalStorage에 저장된 지갑주소를 불러와 화면에 렌더링하고, 필요한 이벤트 리스너를 등록한다.
+   */
+  private init() {
+    const savedAddressList = localStorage.getItem("addressList") || "[]";
+    const parsedAddressList = JSON.parse(savedAddressList);
 
-const removeAddressListItem = function (targetElem: HTMLLIElement) {
-  listElem.removeChild(targetElem);
-}
+    for (let address of parsedAddressList) {
+      this.addAddressListItem(address);
+    }
 
-const registerHandler = function (event: Event) {
-  event.preventDefault();
-
-  const userInput = inputElem.value;
-
-  if (ADDRESS_REGEX.test(userInput)) {
-    addressList.push(userInput);
-    localStorage.setItem("addressList", JSON.stringify(addressList));
-
-    addAddressListItem(userInput);
+    this.addButtonElem.addEventListener("click", this.registerHandler.bind(this));
+    this.listElem.addEventListener("click", this.listRemoveHandler.bind(this));
   }
-}
 
-const listRemoveHandler = function (event: Event) {
-  const targetElem = event.target as HTMLElement;
+  /**
+   * 인자로 전달받은 지갑주소를 기반으로 <li> 태그를 생성하고, <ul> 태그에 추가한다.
+   * @param address 지갑주소
+   */
+  private addAddressListItem(address: string) {
+    const templateContent = this.listTemplate.content;
+    const liElem = document.importNode(templateContent, true);
+    const paragraphElem = liElem.querySelector("p")! as HTMLParagraphElement;
+    paragraphElem.textContent = address;
 
-  if (targetElem && targetElem.tagName === "BUTTON") {
-    const li = targetElem.parentNode as HTMLLIElement;    
-    const paragraph = Array.from(li.children).find(node => node.tagName === "P") as HTMLParagraphElement;
-    const address = paragraph.textContent;
-
-    if (address) {
-      const targetIndex = addressList.findIndex(addr => addr === address);
-
-      addressList.splice(targetIndex, 1);
-      localStorage.setItem("addressList", JSON.stringify(addressList));
+    this.addressList.push(address);
+    this.listElem.appendChild(liElem);
+  }
   
-      removeAddressListItem(li);
+  private removeAddressListItem(address: string, targetElem: HTMLElement) {
+    const targetIndex = this.addressList.findIndex(addr => addr === address);
+
+    this.addressList.splice(targetIndex, 1);
+
+    this.listElem.removeChild(targetElem);
+  }
+
+  private registerHandler(event: Event) {
+    event.preventDefault();
+
+    const userInput = this.inputElem.value;
+  
+    if (ADDRESS_REGEX.test(userInput)) {
+      this.addAddressListItem(userInput);
+
+      localStorage.setItem("addressList", JSON.stringify(this.addressList));
+    }
+  }
+  
+  private listRemoveHandler(event: Event) {
+    const targetElem = event.target as HTMLElement;
+  
+    if (targetElem && targetElem.tagName === "BUTTON") {
+      const li = targetElem.parentNode as HTMLLIElement;    
+      const paragraph = Array.from(li.children).find(node => node.tagName === "P") as HTMLParagraphElement;
+      const address = paragraph.textContent;
+  
+      if (address) {
+        this.removeAddressListItem(address, targetElem);
+
+        localStorage.setItem("addressList", JSON.stringify(this.addressList));
+      }
     }
   }
 }
-
-let addressList: string[];
-
-init();
-
-registerButton.addEventListener("click", registerHandler);
-listElem.addEventListener("click", listRemoveHandler);

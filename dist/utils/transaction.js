@@ -107,26 +107,31 @@ var TransactionReporter = (function () {
             return _this.simplify(records, address);
         })
             .then(function (parsedRecords) { return _this.groupByDate(parsedRecords); })
-            .then(function (recordByDate) {
-            var recordByDateAndToken = {};
-            Object.keys(recordByDate).forEach(function (key) {
-                recordByDateAndToken[key] = _this.groupByToken(recordByDate[key]);
+            .then(function (recordGroupedByDate) {
+            var recordGroupedByDateAndToken = {};
+            Object.keys(recordGroupedByDate).forEach(function (date) {
+                recordGroupedByDateAndToken[date] = _this.groupByToken(recordGroupedByDate[date]);
             });
-            return recordByDateAndToken;
+            return recordGroupedByDateAndToken;
         })
-            .then(function (recordByDateAndToken) {
-            var balanceChangeByDate = {};
-            Object.keys(recordByDateAndToken).forEach(function (date) {
-                var balanceChangeByToken = {};
-                Object.keys(recordByDateAndToken[date]).forEach(function (token) {
-                    balanceChangeByToken[token] = recordByDateAndToken[date][token].reduce(function (acc, _a) {
+            .then(function (grupedByDateAndToken) {
+            var balanceChangePerDate = {};
+            Object.keys(grupedByDateAndToken).forEach(function (date) {
+                var balanceChangePerToken = {
+                    count: Object.keys(grupedByDateAndToken[date]).length,
+                    changes: []
+                };
+                Object.keys(grupedByDateAndToken[date]).forEach(function (token) {
+                    var _a;
+                    var balanceChange = grupedByDateAndToken[date][token].reduce(function (acc, _a) {
                         var parsedValue = _a.parsedValue;
                         return acc + parsedValue;
                     }, 0);
+                    balanceChangePerToken.changes.push((_a = {}, _a[token] = balanceChange, _a));
                 });
-                balanceChangeByDate[date] = balanceChangeByToken;
+                balanceChangePerDate[date] = balanceChangePerToken;
             });
-            return balanceChangeByDate;
+            return balanceChangePerDate;
         })
             .catch(function (error) {
             alert(error);
