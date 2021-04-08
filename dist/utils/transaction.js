@@ -71,73 +71,79 @@ var TransactionReporter = (function () {
     };
     TransactionReporter.prototype.groupByDate = function (records) {
         var groupedRecords = records.reduce(function (acc, record) {
-            var year = record.parsedDate.getFullYear();
-            var month = record.parsedDate.getMonth() + 1;
-            var date = record.parsedDate.getDate();
-            !acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)]
-                ? acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)] = [__assign({}, record)]
-                : acc[year + "/" + (month < 10 ? '0' + month : month) + "/" + (date < 10 ? '0' + date : date)].push(__assign({}, record));
+            var parsedDate = record.parsedDate;
+            var year = parsedDate.getFullYear();
+            var month = parsedDate.getMonth() + 1;
+            var date = parsedDate.getDate();
+            var yearMonthDate = year + "/" + (month < 10 ? "0" + month : month) + "/" + (date < 10 ? "0" + date : date);
+            !acc[yearMonthDate]
+                ? acc[yearMonthDate] = [__assign({}, record)]
+                : acc[yearMonthDate].push(__assign({}, record));
             return acc;
         }, {});
         return groupedRecords;
     };
     TransactionReporter.prototype.groupByToken = function (records) {
         var groupedRecords = records.reduce(function (acc, record) {
-            if (record.tokenSymbol !== "") {
-                !acc[record.tokenSymbol]
-                    ? acc[record.tokenSymbol] = [record]
-                    : acc[record.tokenSymbol].push(record);
-            }
+            var tokenSymbol = record.tokenSymbol;
+            tokenSymbol !== "" && !acc[tokenSymbol]
+                ? acc[tokenSymbol] = [record]
+                : acc[tokenSymbol].push(record);
             return acc;
         }, {});
         return groupedRecords;
     };
-    TransactionReporter.prototype.getDailyReport = function (dailyTokenTransferHistory) {
+    TransactionReporter.prototype.getDailySummary = function (transactionPerToken) {
         var transferPerToken = {
-            count: Object.keys(dailyTokenTransferHistory).length,
+            count: Object.keys(transactionPerToken).length,
             changes: []
         };
-        Object.keys(dailyTokenTransferHistory).forEach(function (token) {
+        Object.keys(transactionPerToken).forEach(function (token) {
             var _a;
-            var transfer = dailyTokenTransferHistory[token].reduce(function (acc, _a) {
+            var summary = transactionPerToken[token].reduce(function (acc, _a) {
                 var parsedValue = _a.parsedValue;
                 return acc + parsedValue;
             }, 0);
-            transferPerToken.changes.push((_a = {}, _a[token] = transfer, _a));
+            transferPerToken.changes.push((_a = {}, _a[token] = summary, _a));
         });
         return transferPerToken;
     };
-    TransactionReporter.prototype.getReport = function (address) {
-        var _this = this;
-        return fetch(this.baseUrl + "?module=account&action=tokentx&address=" + address + "&startblock=0&endblock=999999999&sort=" + this.sortingMethod + "&apikey=" + this.apiKey)
-            .then(function (response) {
-            if (!response.ok) {
-                var error = new Error("API 호출에 실패했습니다!");
-                throw error;
-            }
-            return response.json();
-        })
-            .then(function (_a) {
-            var records = _a.result;
-            return _this.simplify(records, address);
-        })
-            .then(function (parsedRecords) { return _this.groupByDate(parsedRecords); })
-            .then(function (recordGroupedByDate) {
-            var recordGroupedByDateAndToken = {};
-            Object.keys(recordGroupedByDate).forEach(function (date) {
-                recordGroupedByDateAndToken[date] = _this.groupByToken(recordGroupedByDate[date]);
+    TransactionReporter.prototype.getSingleAddressReport = function (address) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error, result, simplifiedDate, groupedByDate_1, groupedByDateAndToken_1, singleAddressReport_1, error_1;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4, fetch(this.baseUrl + "?module=account&action=tokentx&address=" + address + "&startblock=0&endblock=999999999&sort=" + this.sortingMethod + "&apikey=" + this.apiKey)];
+                    case 1:
+                        response = _a.sent();
+                        if (!response.ok) {
+                            error = new Error("API 호출에 실패했습니다!");
+                            throw error;
+                        }
+                        return [4, response.json()];
+                    case 2:
+                        result = (_a.sent()).result;
+                        simplifiedDate = this.simplify(result, address);
+                        groupedByDate_1 = this.groupByDate(simplifiedDate);
+                        groupedByDateAndToken_1 = {};
+                        Object.keys(groupedByDate_1).forEach(function (date) {
+                            groupedByDateAndToken_1[date] = _this.groupByToken(groupedByDate_1[date]);
+                        });
+                        singleAddressReport_1 = {};
+                        Object.keys(groupedByDateAndToken_1).forEach(function (date) {
+                            singleAddressReport_1[date] = _this.getDailySummary(groupedByDateAndToken_1[date]);
+                        });
+                        return [2, singleAddressReport_1];
+                    case 3:
+                        error_1 = _a.sent();
+                        alert(error_1.message);
+                        return [2];
+                    case 4: return [2];
+                }
             });
-            return recordGroupedByDateAndToken;
-        })
-            .then(function (grupedByDateAndToken) {
-            var report = {};
-            Object.keys(grupedByDateAndToken).forEach(function (date) {
-                report[date] = _this.getDailyReport(grupedByDateAndToken[date]);
-            });
-            return report;
-        })
-            .catch(function (error) {
-            alert(error);
         });
     };
     TransactionReporter.prototype.getFullReport = function (addresses) {
@@ -153,7 +159,7 @@ var TransactionReporter = (function () {
                             var report;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
-                                    case 0: return [4, this_1.getReport(address)];
+                                    case 0: return [4, this_1.getSingleAddressReport(address)];
                                     case 1:
                                         report = _b.sent();
                                         if (!report) {
@@ -189,7 +195,6 @@ var TransactionReporter = (function () {
                         _i++;
                         return [3, 1];
                     case 4:
-                        console.log(fullReport);
                         endTime = new Date().getTime();
                         console.log("\uCD1D \uC218\uD589\uC2DC\uAC04: " + (endTime - startTime) + "ms");
                         return [2, fullReport];

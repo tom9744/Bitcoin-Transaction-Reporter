@@ -9,12 +9,10 @@ var WalletManager = (function () {
         this.init();
     }
     WalletManager.prototype.init = function () {
+        var _this = this;
         var savedAddressList = localStorage.getItem("addressList") || "[]";
         var parsedAddressList = JSON.parse(savedAddressList);
-        for (var _i = 0, parsedAddressList_1 = parsedAddressList; _i < parsedAddressList_1.length; _i++) {
-            var address = parsedAddressList_1[_i];
-            this.addAddressListItem(address);
-        }
+        parsedAddressList.forEach(function (address) { _this.addAddressListItem(address); });
         this.addButtonElem.addEventListener("click", this.registerHandler.bind(this));
         this.listElem.addEventListener("click", this.listRemoveHandler.bind(this));
     };
@@ -23,31 +21,31 @@ var WalletManager = (function () {
         var liElem = document.importNode(templateContent, true);
         var paragraphElem = liElem.querySelector("p");
         paragraphElem.textContent = address;
-        this.addressList.push(address);
         this.listElem.appendChild(liElem);
     };
-    WalletManager.prototype.removeAddressListItem = function (address, targetElem) {
-        var targetIndex = this.addressList.findIndex(function (addr) { return addr === address; });
-        this.addressList.splice(targetIndex, 1);
-        this.listElem.removeChild(targetElem);
+    WalletManager.prototype.removeAddressListItem = function (listitemElem) {
+        this.listElem.removeChild(listitemElem);
     };
     WalletManager.prototype.registerHandler = function (event) {
         event.preventDefault();
-        var userInput = this.inputElem.value;
-        if (ADDRESS_REGEX.test(userInput)) {
-            this.addAddressListItem(userInput);
+        var newAddress = this.inputElem.value;
+        if (ADDRESS_REGEX.test(newAddress)) {
+            this.addressList.push(newAddress);
             localStorage.setItem("addressList", JSON.stringify(this.addressList));
+            this.addAddressListItem(newAddress);
         }
     };
     WalletManager.prototype.listRemoveHandler = function (event) {
         var targetElem = event.target;
         if (targetElem && targetElem.tagName === "BUTTON") {
-            var li = targetElem.parentNode;
-            var paragraph = Array.from(li.children).find(function (node) { return node.tagName === "P"; });
-            var address = paragraph.textContent;
-            if (address) {
-                this.removeAddressListItem(address, targetElem);
+            var liElem = targetElem.parentNode;
+            var paragraphElem = Array.from(liElem.children).find(function (node) { return node.tagName === "P"; });
+            var address_1 = paragraphElem.textContent;
+            if (address_1) {
+                var targetIndex = this.addressList.findIndex(function (addr) { return addr === address_1; });
+                this.addressList.splice(targetIndex, 1);
                 localStorage.setItem("addressList", JSON.stringify(this.addressList));
+                this.removeAddressListItem(liElem);
             }
         }
     };

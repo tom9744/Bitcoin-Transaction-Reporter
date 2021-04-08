@@ -22,11 +22,9 @@ export default class WalletManager {
    */
   private init() {
     const savedAddressList = localStorage.getItem("addressList") || "[]";
-    const parsedAddressList = JSON.parse(savedAddressList);
+    const parsedAddressList = JSON.parse(savedAddressList) as string[]; // Javascript 배열로 변환. 
 
-    for (let address of parsedAddressList) {
-      this.addAddressListItem(address);
-    }
+    parsedAddressList.forEach(address => { this.addAddressListItem(address); });
 
     this.addButtonElem.addEventListener("click", this.registerHandler.bind(this));
     this.listElem.addEventListener("click", this.listRemoveHandler.bind(this));
@@ -42,42 +40,48 @@ export default class WalletManager {
     const paragraphElem = liElem.querySelector("p")! as HTMLParagraphElement;
     paragraphElem.textContent = address;
 
-    this.addressList.push(address);
     this.listElem.appendChild(liElem);
   }
   
-  private removeAddressListItem(address: string, targetElem: HTMLElement) {
-    const targetIndex = this.addressList.findIndex(addr => addr === address);
-
-    this.addressList.splice(targetIndex, 1);
-
-    this.listElem.removeChild(targetElem);
+  /**
+   * 인자로 전달받은 <li> 태그를 <ul>에서 제거한다. 
+   * @param listitemElem 삭제할 <li> 태그에 대한 DOM 객체
+   */
+  private removeAddressListItem(listitemElem: HTMLLIElement) {
+    this.listElem.removeChild(listitemElem);
   }
 
   private registerHandler(event: Event) {
     event.preventDefault();
 
-    const userInput = this.inputElem.value;
+    const newAddress = this.inputElem.value;
   
-    if (ADDRESS_REGEX.test(userInput)) {
-      this.addAddressListItem(userInput);
+    if (ADDRESS_REGEX.test(newAddress)) {
+      this.addressList.push(newAddress);
 
       localStorage.setItem("addressList", JSON.stringify(this.addressList));
+
+      this.addAddressListItem(newAddress);
     }
   }
   
   private listRemoveHandler(event: Event) {
+    // TODO: 문제가 될 수 있는 요소가 있으므로 개선해야 한다.
     const targetElem = event.target as HTMLElement;
   
     if (targetElem && targetElem.tagName === "BUTTON") {
-      const li = targetElem.parentNode as HTMLLIElement;    
-      const paragraph = Array.from(li.children).find(node => node.tagName === "P") as HTMLParagraphElement;
-      const address = paragraph.textContent;
+      const liElem = targetElem.parentNode as HTMLLIElement;   
+      const paragraphElem = Array.from(liElem.children).find(node => node.tagName === "P") as HTMLParagraphElement;
+      const address = paragraphElem.textContent;
   
       if (address) {
-        this.removeAddressListItem(address, targetElem);
+        const targetIndex = this.addressList.findIndex(addr => addr === address);
+
+        this.addressList.splice(targetIndex, 1);
 
         localStorage.setItem("addressList", JSON.stringify(this.addressList));
+
+        this.removeAddressListItem(liElem);
       }
     }
   }

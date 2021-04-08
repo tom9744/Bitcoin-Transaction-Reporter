@@ -44,15 +44,18 @@ export default class TransactionReporter {
    */
   private groupByDate(records: Array<ParsedRecord>) {
     const groupedRecords = records.reduce((acc: { [date: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
-      const year = record.parsedDate.getFullYear();
-      const month = record.parsedDate.getMonth() + 1;
-      const date = record.parsedDate.getDate();
+      const { parsedDate } = record;
+      const year = parsedDate.getFullYear();
+      const month = parsedDate.getMonth() + 1;
+      const date = parsedDate.getDate();
+      const yearMonthDate = `${year}/${month < 10 ? `0${month}` : month}/${date < 10 ? `0${date}` : date}`;
       
-      !acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`] 
-        ? acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`] = [{ ...record }]
-        : acc[`${year}/${month < 10 ? '0' + month : month}/${date < 10 ? '0' + date : date}`].push({  ...record });
+      // YYYY/MM/DD가 이미 key로 존재하면 배열에 push()하고, 없다면 새로 생성한다.
+      !acc[yearMonthDate] 
+        ? acc[yearMonthDate] = [{ ...record }]
+        : acc[yearMonthDate].push({  ...record });
 
-    return acc;
+      return acc;
     }, {});
 
     return groupedRecords;
@@ -65,11 +68,12 @@ export default class TransactionReporter {
    */
   private groupByToken(records: Array<ParsedRecord>) {
     const groupedRecords = records.reduce((acc: { [tokenSymbol: string] : Array<ParsedRecord> }, record: ParsedRecord) => {
-      if(record.tokenSymbol !== "") {
-        !acc[record.tokenSymbol] 
-        ? acc[record.tokenSymbol] = [record]
-        : acc[record.tokenSymbol].push(record);
-      }
+      const { tokenSymbol } = record;
+
+      // TokenSymbol이 빈 문자열인 경우를 제외하며, TokenSymbol이 이미 key로 존재하면 배열에 push()하고, 없다면 새로 생성한다.
+      tokenSymbol !== "" && !acc[tokenSymbol] 
+        ? acc[tokenSymbol] = [record]
+        : acc[tokenSymbol].push(record);
 
       return acc;
     }, {});
@@ -77,60 +81,77 @@ export default class TransactionReporter {
     return groupedRecords;
   }
 
-  private getDailyReport(dailyTokenTransferHistory: { [tokenSymbol: string]: ParsedRecord[] }) {
+  /**
+   * 일별 코인 거래 내역을 받아와, 거래된 코인의 가지수와 최종 거래량(+, -)을 구해 반환한다.
+   * @param transactionPerToken 일별 코인 거래 내역
+   * @returns 거래된 코인의 가지수와 코인 별 최종 거래량
+   */
+  private getDailySummary(transactionPerToken: { [tokenSymbol: string]: ParsedRecord[] }) {
     const transferPerToken: DailyTokenReport = { 
-      count: Object.keys(dailyTokenTransferHistory).length,  // 해당 일자에 거래된 코인의 가지수
+      count: Object.keys(transactionPerToken).length,  // 해당 일자에 거래된 코인의 가지수
       changes: []
     };
 
-    // 당일 거래된 코인에 대해, 입금/출금액을 모두 더해 최종 거래량을 산출한다.
-    Object.keys(dailyTokenTransferHistory).forEach(token => {
-      const transfer = dailyTokenTransferHistory[token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
+    // 당일 거래된 코인들의 입금/출금액을 모두 더해, 일일 최종 거래량을 구한다.
+    Object.keys(transactionPerToken).forEach(token => {
+      const summary = transactionPerToken[token].reduce((acc, { parsedValue }) => acc + parsedValue, 0);
 
-      transferPerToken.changes.push({ [token]: transfer });
+      transferPerToken.changes.push({ [token]: summary });
     });
 
     return transferPerToken;
   }
 
-  private getReport(address: string) {
-    return fetch(`${this.baseUrl}?module=account&action=tokentx&address=${address}&startblock=0&endblock=999999999&sort=${this.sortingMethod}&apikey=${this.apiKey}`)
-    .then(response => {
+  /**
+   * 인자로 전달된 지갑 주소에 대해한 종합 보고서를 생성한다.
+   * @param address 지갑 주소
+   * @returns API 호출 후 도착한 파싱한 
+   */
+  private async getSingleAddressReport(address: string) {
+    try {
+      const response = await fetch(`${this.baseUrl}?module=account&action=tokentx&address=${address}&startblock=0&endblock=999999999&sort=${this.sortingMethod}&apikey=${this.apiKey}`);
+
       if (!response.ok) {
         const error = new Error("API 호출에 실패했습니다!");
         throw error;
       }
-      return response.json();
-    })
-    .then(({ result: records }) => this.simplify(records, address))
-    .then(parsedRecords => this.groupByDate(parsedRecords))
-    .then(recordGroupedByDate => {
-      const recordGroupedByDateAndToken: { [date: string] : { [tokenSymbol: string] : Array<ParsedRecord> } } = {};
+
+      const { result } = await response.json();      
+      const simplifiedDate = this.simplify(result, address);
+      const groupedByDate =  this.groupByDate(simplifiedDate);
+      const groupedByDateAndToken: { 
+        [date: string] : { 
+          [tokenSymbol: string] : ParsedRecord[]
+        } 
+      } = {};
       
-      Object.keys(recordGroupedByDate).forEach((date: string) => {
-        recordGroupedByDateAndToken[date] = this.groupByToken(recordGroupedByDate[date]);
+      // 날짜 단위로 묶인 거래내역 그룹 각각에 대해, 다시 한번 코인별로 묶는다.
+      Object.keys(groupedByDate).forEach((date: string) => {
+        groupedByDateAndToken[date] = this.groupByToken(groupedByDate[date]);
       });
-
-      return recordGroupedByDateAndToken;
-    })
-    // 단일 지갑에서 하루동안 거래된 코인들의 최종 거래량을 구한다.
-    .then(grupedByDateAndToken => {      
-      const report: { [date: string]: DailyTokenReport } = {};
-
-      // 일자별 거래 내역에 대해 다음의 로직을 수행한다.
-      Object.keys(grupedByDateAndToken).forEach(date => {
-        // 당일 거래된 코인들에 대한 최종 거래량 산출 결과를 종합 보고서에 추가한다. 
-        report[date] = this.getDailyReport(grupedByDateAndToken[date]);
+  
+      const singleAddressReport: { [date: string]: DailyTokenReport } = {};
+  
+      // 날짜 단위로 묶인 거래내역에 대해, 해당 일자에 거래된 코인의 최종 거래량을 산출한다. 
+      Object.keys(groupedByDateAndToken).forEach(date => {
+        singleAddressReport[date] = this.getDailySummary(groupedByDateAndToken[date]);
       });
-
-      return report;
-    })
-    .catch(error => {
+  
+      return singleAddressReport;
+    } 
+    catch (error) {
       // TODO: 보다 강인한 에러 처리
-      alert(error);
-    });
+      alert(error.message);
+
+      return;
+    }
   }
 
+  /**
+   * 인자로 전달받은 '지갑 주소 배열'의 각 요소들에 대한 단일 보고서를 생성하고, 최종 보고서로 완성한다.
+   * @param addresses 지갑 주소의 배열
+   * @returns 최종 보고서
+   */
   public async getFullReport(addresses: string[]) {
     const startTime = new Date().getTime();
     console.log("[SYSTEM] Started Loading Transaction Data...");
@@ -139,7 +160,7 @@ export default class TransactionReporter {
 
     // [순차적 비동기 처리] 지갑 주소 각각에 대한 보고서를 생성하고, 종합 보고서 객체를 생성한다.
     for (const address of addresses) {
-      const report = await this.getReport(address);
+      const report = await this.getSingleAddressReport(address);
 
       if (!report) { continue; }
       
@@ -149,17 +170,13 @@ export default class TransactionReporter {
           fullReport[date] = {
             count: report[date].count,
             reports: [ { address: address, report: report[date] } ]
-          }
-        }
-        else {
+          };
+        } else {
           fullReport[date].count += report[date].count;
           fullReport[date].reports.push({ address: address, report: report[date] });
         }
       });
     }
-
-    console.log(fullReport);
-    
 
     const endTime = new Date().getTime();
     console.log(`총 수행시간: ${endTime - startTime}ms`);
