@@ -79,3 +79,15 @@
 .app-table--body__odd {
   background-color: var(--primary-color);
 }
+
+.app-table--transaction {
+
+}
+
+.app-table--transaction__in {
+  color: rgb(103, 221, 73);
+}
+
+.app-table--transaction__out {
+  color: rgb(221, 73, 73);
+}

@@ -114,7 +114,7 @@ export default class TransactionReporter {
       return recordGroupedByDateAndToken;
     })
     // 단일 지갑에서 하루동안 거래된 코인들의 최종 거래량을 구한다.
-    .then(grupedByDateAndToken => {
+    .then(grupedByDateAndToken => {      
       const report: { [date: string]: DailyTokenReport } = {};
 
       // 일자별 거래 내역에 대해 다음의 로직을 수행한다.

@@ -29,8 +29,15 @@ var makeTable = function (fullReport) {
                 tokenTd.textContent = tokenSymbol;
                 tokenTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
                 var amountTd = document.createElement("td");
-                amountTd.textContent = balanceChange + "";
                 amountTd.classList.add(index % 2 === 0 ? "app-table--body__even" : "app-table--body__odd");
+                var paragraph = document.createElement("p");
+                paragraph.textContent = balanceChange + "";
+                paragraph.classList.add(balanceChange > 0
+                    ? "app-table--transaction__in"
+                    : balanceChange < 0
+                        ? "app-table--transaction__out"
+                        : "app-table--transaction");
+                amountTd.appendChild(paragraph);
                 tokens.push(tokenTd);
                 amounts.push(amountTd);
             });
