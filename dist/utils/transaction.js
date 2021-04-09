@@ -60,7 +60,14 @@ var TransactionReporter = (function () {
         return this.instance;
     };
     TransactionReporter.prototype.simplify = function (records, walletAddress) {
-        return records.map(function (_a) {
+        return records
+            .filter(function (_a) {
+            var timeStamp = _a.timeStamp;
+            var timeGap = new Date().getTime() - +timeStamp * 1000;
+            var daysPassed = timeGap / 1000 / 60 / 60 / 24;
+            return daysPassed < 90;
+        })
+            .map(function (_a) {
             var value = _a.value, tokenDecimal = _a.tokenDecimal, tokenSymbol = _a.tokenSymbol, from = _a.from, timeStamp = _a.timeStamp;
             var parsedDate = parseDate(timeStamp);
             var parsedValue = walletAddress.toUpperCase() === from.toUpperCase()

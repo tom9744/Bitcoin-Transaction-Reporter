@@ -27,14 +27,21 @@ export default class TransactionReporter {
    * @returns 
    */
   private simplify(records: Array<Record>, walletAddress: string) : Array<ParsedRecord> {
-    return records.map(({ value, tokenDecimal, tokenSymbol, from, timeStamp }) => {
-      const parsedDate = parseDate(timeStamp);
-      const parsedValue = walletAddress.toUpperCase() === from.toUpperCase() 
-        ? -parseValue(value, tokenDecimal)
-        : parseValue(value, tokenDecimal);
-  
-      return { parsedValue, tokenSymbol, parsedDate };
-    });
+    return records
+      .filter(({ timeStamp }) => {
+        const timeGap = new Date().getTime() - +timeStamp * 1000;
+        const daysPassed = timeGap / 1000 / 60 / 60 / 24;
+
+        return daysPassed < 90;  // 3개월(90알) 전 데이터만 가져오도록 자른다.
+      })
+      .map(({ value, tokenDecimal, tokenSymbol, from, timeStamp }) => {
+        const parsedDate = parseDate(timeStamp);
+        const parsedValue = walletAddress.toUpperCase() === from.toUpperCase() 
+          ? -parseValue(value, tokenDecimal)
+          : parseValue(value, tokenDecimal);
+      
+        return { parsedValue, tokenSymbol, parsedDate };
+      });
   }
 
   /**
