@@ -30,8 +30,9 @@ export default class ReportMaker {
         <thead>
             <tr align="center">
                 <th class="app-table--head" style="width:10%">날짜</th>
-                <th class="app-table--head" style="width:50%">지갑</th>
-                <th class="app-table--head" style="width:20%">코인</th>
+                <th class="app-table--head" style="width:40%">지갑</th>
+                <th class="app-table--head" style="width:29%">코인</th>
+                <th class="app-table--head" style="width:10%">거래 형태</th>
                 <th class="app-table--head" style="width:20%">거래량</th>
             </tr>
         </thead>
@@ -60,7 +61,7 @@ export default class ReportMaker {
       
       // 거래일에 대한 테이블 데이터 셀을 생성한다.
       const tableAttrs = [ { key: "rowspan", value: fullReport[date].count + "" } ];
-      const dateTableCellElem = this.tableHeaderCell.generate(date, tableClassName, tableAttrs);
+      const dateTableCellElem = this.tableHeaderCell.generate(date, [tableClassName], tableAttrs);
       
       // 단일 일자에 대한 
       fullReport[date].reports.forEach(({ address, report }, addressIndex) => {
@@ -69,26 +70,40 @@ export default class ReportMaker {
         if (count !== 0) {
           // 지갑 주소에 대한 테이블 데이터 셀을 생성한다.
           const tableAttrs = [ { key: "rowspan", value: count + "" } ];
-          const addressTableCellElem = this.tableDataCell.generate(address, tableClassName, tableAttrs);
+          const addressTableCellElem = this.tableDataCell.generate(address, [tableClassName], tableAttrs);
           
           // 코인 이름과 거래량에 대한 테이블 데이터 셀을 생성한다.
           changes.forEach((change, changeIndex) => {
             const [ tokenSymbol, balanceChange ] = Object.entries(change)[0];
             const cells = [];
             
-            const tokenTableCellElem = this.tableDataCell.generate(tokenSymbol, tableClassName);
-            const amountTableCellElem = this.tableDataCell.generate("", tableClassName);
+            const tokenTableCellElem = this.tableDataCell.generate(tokenSymbol, [tableClassName]);
+            const directionTableCellElem = this.tableDataCell.generate("", [tableClassName]);
+            
+            const flag = document.createElement("p");
+            flag.textContent = balanceChange > 0 ? "IN" : (balanceChange < 0 ? "OUT": "-");
+            flag.className = balanceChange > 0 
+              ? "app-table--flag__in"
+              : balanceChange < 0
+                ? "app-table--flag__out"
+                : "app-table--flag";
+            
+            directionTableCellElem.appendChild(flag);
+
             const paragraphElem = this.paragraph.generate(balanceChange);
+
+            const amountTableCellElem = this.tableDataCell.generate("", [tableClassName]);
             amountTableCellElem.appendChild(paragraphElem);
             
             if (changeIndex === 0) {
               if (addressIndex === 0) {
-                cells.push(dateTableCellElem)
+                cells.push(dateTableCellElem);
               }
-              cells.push(addressTableCellElem)
+              cells.push(addressTableCellElem);
             }
-            cells.push(tokenTableCellElem)
-            cells.push(amountTableCellElem)
+            cells.push(tokenTableCellElem);
+            cells.push(directionTableCellElem);
+            cells.push(amountTableCellElem);
             
             const tableRowElem = this.tableRowCell.generate(cells);
             

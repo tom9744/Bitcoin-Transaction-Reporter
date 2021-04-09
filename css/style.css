@@ -77,8 +77,10 @@
   border: 2px solid var(--accent-color);
 }
 
-.app-table--head, .app-table--body__even, .app-table--body__odd{
-  padding: 1rem;
+.app-table--head, 
+.app-table--body__even, 
+.app-table--body__odd {
+  padding: .5rem;
 }
 
 .app-table--head {
@@ -89,7 +91,7 @@
 
 .app-table--body__even, 
 .app-table--body__odd {
-  height: 1.75rem;
+  height: 1.25rem;
 }
 
 .app-table--body__even {
@@ -106,6 +108,7 @@
   justify-content: center;
 }
 
+.app-table--flag,
 .app-table--flag__in,
 .app-table--flag__out {
   display: flex;
@@ -119,8 +122,6 @@
 
   font-size: 0.8rem;
   font-weight: bold;
-
-  margin-right: 1rem;
 }
 
 .app-table--flag__in {

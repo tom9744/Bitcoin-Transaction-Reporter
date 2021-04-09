@@ -12,15 +12,17 @@ export default class TableCell {
    * @param attributes HTML 요소에 추가할 Attribute(key, value) 배열
    * @returns 생성된 TableDataCell 또는 TableHeaderCell 태그
    */
-  public generate(textContent: string, className?: string, attributes?: Array<{ key: string, value: string }>) {
+  public generate(textContent: string, classNames?: string[], attributes?: Array<{ key: string, value: string }>) {
     const tableDataCellElem = document.createElement(this.elementType);
 
     if (textContent !== "") {
       tableDataCellElem.textContent = textContent;
     }
 
-    if(className) {
-      tableDataCellElem.classList.add(className);
+    if(classNames) {
+      classNames.forEach(className => {
+        tableDataCellElem.classList.add(className);
+      })
     }
 
     if(attributes) {
