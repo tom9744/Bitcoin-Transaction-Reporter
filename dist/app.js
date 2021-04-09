@@ -1,6 +1,20 @@
-import WalletManager from "./components/address.js";
+import WalletManager from "./components/WalletManager/WalletManager.js";
 import ReportMaker from "./components/ReportTable/ReportTable.js";
-new WalletManager();
-var maker = new ReportMaker();
-maker.render();
+var App = (function () {
+    function App() {
+    }
+    App.init = function () {
+        var wallet = new WalletManager();
+        var reportMaker = new ReportMaker();
+        wallet.render();
+        reportMaker.render();
+        this.walletList = wallet.walletList;
+    };
+    App.addAddress = function (address) {
+        this.walletList.addAddress(address);
+    };
+    return App;
+}());
+export default App;
+App.init();
 //# sourceMappingURL=app.js.map

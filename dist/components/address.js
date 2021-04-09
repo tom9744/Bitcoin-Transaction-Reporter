@@ -49,6 +49,8 @@ var WalletManager = (function () {
             }
         }
     };
+    WalletManager.prototype.render = function () {
+    };
     return WalletManager;
 }());
 export default WalletManager;

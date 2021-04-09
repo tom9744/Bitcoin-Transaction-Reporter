@@ -1,5 +1,5 @@
 import { FullReport } from "../../@types/types.js"
-import TransactionReporter from "../../utils/transaction.js";
+import TransactionReporter from "../../utils/Transaction.js";
 import TableCell from "./Table/TableCell.js";
 import TableRow from "./Table/TableRow.js";
 import BalanceChange from "./Table/BalanceChange.js";
