@@ -31,7 +31,7 @@
   margin: 1rem 0;
 }
 
-.report--button {
+.report--button__abled {
   border: 1px solid rgb(48, 54, 61);
   border-radius: 8px;
   outline: none;
@@ -47,6 +47,25 @@
 
   cursor: pointer;
 }
+
+.report--button__disabled {
+  border: 1px solid rgb(48, 54, 61);
+  border-radius: 8px;
+  outline: none;
+
+  height: 2.5rem;
+  width: 10rem;
+  
+  font-size: 1.1rem;
+  font-weight: bold;
+
+  color: rgb(75, 75, 75);
+  background-color: rgb(139, 139, 139);
+
+  cursor: wait;
+  pointer-events: none;
+}
+
 
 .app-table {
   width: 100%;

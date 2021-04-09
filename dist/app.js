@@ -17,4 +17,4 @@ var App = (function () {
 }());
 export default App;
 App.init();
-//# sourceMappingURL=app.js.map
+//# sourceMappingURL=App.js.map

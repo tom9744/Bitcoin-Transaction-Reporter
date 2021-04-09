@@ -45,6 +45,10 @@ var ReportMaker = (function () {
         this.tableRowCell = new TableRow();
         this.paragraph = new BalanceChange();
         this.tableRows = [];
+        this.reportSection = document.querySelector(".report");
+        this.reportSection.innerHTML = "\n      <button class=\"report--button__abled\">\uBCF4\uACE0\uC11C \uBC1B\uAE30</button>\n\n      <em class=\"report--notice\">\uC0C8\uB85C\uACE0\uCE68 \uD558\uC2DC\uBA74 \uBCF4\uACE0\uC11C\uAC00 \uCD08\uAE30\uD654\uB429\uB2C8\uB2E4...!</em>\n\n      <table\n        class=\"app-table\"\n        width=\"50%\"\n        height=\"200\"\n        cellspacing=\"5\"\n        border=\"1\"\n      >\n        <thead>\n            <tr align=\"center\">\n                <th class=\"app-table--head\" style=\"width:10%\">\uB0A0\uC9DC</th>\n                <th class=\"app-table--head\" style=\"width:50%\">\uC9C0\uAC11</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uCF54\uC778</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uAC70\uB798\uB7C9</th>\n            </tr>\n        </thead>\n\n        <tbody id=\"tbody\" class=\"table--body\">\n        </tbody>\n      </table>\n    ";
+        var reportGenerateButton = this.reportSection.querySelector(".report--button__abled");
+        reportGenerateButton.addEventListener("click", this.generateReportHandler.bind(this));
     }
     ReportMaker.prototype.generateReport = function (fullReport) {
         var _this = this;
@@ -90,10 +94,12 @@ var ReportMaker = (function () {
     };
     ReportMaker.prototype.generateReportHandler = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var reporter, fromLocalStorage, addressList, fullReport;
+            var reportGenerateButton, reporter, fromLocalStorage, addressList, fullReport;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        reportGenerateButton = this.reportSection.querySelector(".report--button__abled");
+                        reportGenerateButton.className = "report--button__disabled";
                         reporter = TransactionReporter.getInstance("desc");
                         fromLocalStorage = localStorage.getItem("addressList") || "[]";
                         addressList = JSON.parse(fromLocalStorage);
@@ -102,17 +108,14 @@ var ReportMaker = (function () {
                         fullReport = _a.sent();
                         this.generateReport(fullReport);
                         this.render();
+                        reportGenerateButton.className = "report--button__abled";
                         return [2];
                 }
             });
         });
     };
     ReportMaker.prototype.render = function () {
-        var reportSection = document.querySelector(".report");
-        reportSection.innerHTML = "\n      <button class=\"report--button\">\uBCF4\uACE0\uC11C \uBC1B\uAE30</button>\n\n      <em class=\"report--notice\">\uC0C8\uB85C\uACE0\uCE68 \uD558\uC2DC\uBA74 \uBCF4\uACE0\uC11C\uAC00 \uCD08\uAE30\uD654\uB429\uB2C8\uB2E4...!</em>\n\n      <table\n        class=\"app-table\"\n        width=\"50%\"\n        height=\"200\"\n        cellspacing=\"5\"\n        border=\"1\"\n      >\n        <thead>\n            <tr align=\"center\">\n                <th class=\"app-table--head\" style=\"width:10%\">\uB0A0\uC9DC</th>\n                <th class=\"app-table--head\" style=\"width:50%\">\uC9C0\uAC11</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uCF54\uC778</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uAC70\uB798\uB7C9</th>\n            </tr>\n        </thead>\n\n        <tbody id=\"tbody\" class=\"table--body\">\n        </tbody>\n      </table>\n    ";
-        var reportGenerateButton = reportSection.querySelector(".report--button");
-        reportGenerateButton.addEventListener("click", this.generateReportHandler.bind(this));
-        var tableBody = reportSection.querySelector(".table--body");
+        var tableBody = this.reportSection.querySelector(".table--body");
         this.tableRows.forEach(function (tableRow) {
             tableBody.appendChild(tableRow);
         });

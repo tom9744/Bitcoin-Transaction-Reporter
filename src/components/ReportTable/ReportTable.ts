@@ -11,8 +11,38 @@ export default class ReportMaker {
   private paragraph = new BalanceChange();
 
   private tableRows: HTMLTableRowElement[] = [];
+  private reportSection: HTMLElement;
 
-  constructor() {}
+  constructor() {
+    this.reportSection = document.querySelector(".report")! as HTMLElement;
+    this.reportSection.innerHTML = `
+      <button class="report--button__abled">보고서 받기</button>
+
+      <em class="report--notice">새로고침 하시면 보고서가 초기화됩니다...!</em>
+
+      <table
+        class="app-table"
+        width="50%"
+        height="200"
+        cellspacing="5"
+        border="1"
+      >
+        <thead>
+            <tr align="center">
+                <th class="app-table--head" style="width:10%">날짜</th>
+                <th class="app-table--head" style="width:50%">지갑</th>
+                <th class="app-table--head" style="width:20%">코인</th>
+                <th class="app-table--head" style="width:20%">거래량</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody" class="table--body">
+        </tbody>
+      </table>
+    `
+    const reportGenerateButton = this.reportSection.querySelector(".report--button__abled")! as HTMLButtonElement;
+    reportGenerateButton.addEventListener("click", this.generateReportHandler.bind(this));
+  }
   
   private generateReport(fullReport: FullReport) {
     // [중요] key 값을 '숫자'로 변환하여 정렬하여야 제대로 정렬된다.
@@ -70,6 +100,10 @@ export default class ReportMaker {
   }
   
   private async generateReportHandler() {
+    // 로딩 시 버튼 비활성화
+    const reportGenerateButton = this.reportSection.querySelector(".report--button__abled")! as HTMLButtonElement;
+    reportGenerateButton.className = "report--button__disabled";
+
     const reporter = TransactionReporter.getInstance("desc");
     const fromLocalStorage = localStorage.getItem("addressList") || "[]"; 
     const addressList = JSON.parse(fromLocalStorage);
@@ -77,39 +111,13 @@ export default class ReportMaker {
     const fullReport = await reporter.getFullReport(addressList);
     this.generateReport(fullReport);
     this.render();
+
+    // 버튼 재활성화
+    reportGenerateButton.className = "report--button__abled";
   }
   
   public render() {
-    const reportSection = document.querySelector(".report")! as HTMLElement;
-    reportSection.innerHTML = `
-      <button class="report--button">보고서 받기</button>
-
-      <em class="report--notice">새로고침 하시면 보고서가 초기화됩니다...!</em>
-
-      <table
-        class="app-table"
-        width="50%"
-        height="200"
-        cellspacing="5"
-        border="1"
-      >
-        <thead>
-            <tr align="center">
-                <th class="app-table--head" style="width:10%">날짜</th>
-                <th class="app-table--head" style="width:50%">지갑</th>
-                <th class="app-table--head" style="width:20%">코인</th>
-                <th class="app-table--head" style="width:20%">거래량</th>
-            </tr>
-        </thead>
-
-        <tbody id="tbody" class="table--body">
-        </tbody>
-      </table>
-    `
-    const reportGenerateButton = reportSection.querySelector(".report--button")! as HTMLButtonElement;
-    reportGenerateButton.addEventListener("click", this.generateReportHandler.bind(this));
-
-    const tableBody = reportSection.querySelector(".table--body")! as HTMLTableSectionElement;
+    const tableBody = this.reportSection.querySelector(".table--body")! as HTMLTableSectionElement;
     this.tableRows.forEach(tableRow => {
       tableBody.appendChild(tableRow);
     });

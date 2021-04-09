@@ -205,4 +205,4 @@ var TransactionReporter = (function () {
     return TransactionReporter;
 }());
 export default TransactionReporter;
-//# sourceMappingURL=transaction.js.map
+//# sourceMappingURL=Transaction.js.map
