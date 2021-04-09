@@ -87,8 +87,9 @@
   background-color: var(--primary-color);
 }
 
-.app-table--body__even, .app-table--body__odd {
-  height: 2rem;
+.app-table--body__even, 
+.app-table--body__odd {
+  height: 1.75rem;
 }
 
 .app-table--body__even {
@@ -99,14 +100,46 @@
   background-color: var(--primary-color);
 }
 
-.app-table--transaction {
-
+.app-table--transaction-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.app-table--transaction__in {
-  color: rgb(103, 221, 73);
+.app-table--flag__in,
+.app-table--flag__out {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 1rem;
+
+  height: 1.25rem;
+  width: 2.25rem;
+
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  margin-right: 1rem;
 }
 
-.app-table--transaction__out {
-  color: rgb(221, 73, 73);
+.app-table--flag__in {
+  background-color: rgb(40, 167, 69);
+}
+
+.app-table--flag__out {
+  background-color: rgb(215, 58, 73)
+}
+
+.app-table--amount__in, 
+.app-table--amount__out  {
+  display: inline-block;
+}
+
+.app-table--amount__in {
+  color: rgb(40, 167, 69);
+}
+
+.app-table--amount__out {
+  color: rgb(215, 58, 73)
 }
