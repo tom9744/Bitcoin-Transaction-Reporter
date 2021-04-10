@@ -7,8 +7,27 @@ export default class WalletForm {
     this.formElem = document.createElement("form");
     this.formElem.className = "wallet--form";
     this.formElem.innerHTML = `
-      <input class="wallet--input" type="text" />
-      <button class="wallet--button__add">등록</button>
+      <div class="wallet--input-wrapper">
+        <label for="address">지갑주소</label>
+        <input 
+          type="text" 
+          id="address" 
+          class="wallet--input__address" 
+          placeholder="보고서에 등록할 지갑주소" 
+        />
+      </div>
+
+      <div class="wallet--input-wrapper">
+        <label for="alias">별명</label>
+        <input 
+          type="text" 
+          id="alias" 
+          class="wallet--input__alias" 
+          placeholder="지갑주소를 기억하기 위한 별명" 
+        />
+      </div>
+
+      <button class="wallet--button__add">지갑주소 추가</button>
     `;
 
     const buttonElem = this.formElem.querySelector("button")! as HTMLButtonElement;
@@ -18,12 +37,16 @@ export default class WalletForm {
   private addToList(event: Event) {
     event.preventDefault();
 
-    const inputElem = this.formElem.querySelector("input")!;
-    const newAddr = inputElem.value;
+    const addressInputElem = this.formElem.querySelector(".wallet--input__address")! as HTMLInputElement;
+    const aliasInputElem = this.formElem.querySelector(".wallet--input__alias")! as HTMLInputElement;
 
-    inputElem.value = "";
+    const newAddr = addressInputElem.value;
+    const newAlias = aliasInputElem.value;
 
-    App.addAddress(newAddr);
+    addressInputElem.value = "";
+    aliasInputElem.value = "";
+
+    App.addAddress({ address: newAddr, alias: newAlias });
   }
 
   render() {

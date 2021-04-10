@@ -115,10 +115,12 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 1rem;
+  border-radius: 8px;
 
   height: 1.25rem;
   width: 2.25rem;
+
+  margin: 0 auto;
 
   font-size: 0.8rem;
   font-weight: bold;

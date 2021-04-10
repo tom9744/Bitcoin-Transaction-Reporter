@@ -26,7 +26,7 @@ export default class TransactionReporter {
    * @param walletAddress 
    * @returns 
    */
-  private simplify(records: Array<Record>, walletAddress: string) : Array<ParsedRecord> {
+  private simplify(records: Array<Record>, walletAddress: string) : Array<ParsedRecord> {    
     return records
       .filter(({ timeStamp }) => {
         const timeGap = new Date().getTime() - +timeStamp * 1000;
@@ -159,14 +159,14 @@ export default class TransactionReporter {
    * @param addresses 지갑 주소의 배열
    * @returns 최종 보고서
    */
-  public async getFullReport(addresses: string[]) {
+  public async getFullReport(addresses: Array<{ address: string, alias: string }>) {
     const startTime = new Date().getTime();
     console.log("[SYSTEM] Started Loading Transaction Data...");
     
     const fullReport: FullReport = {};
 
     // [순차적 비동기 처리] 지갑 주소 각각에 대한 보고서를 생성하고, 종합 보고서 객체를 생성한다.
-    for (const address of addresses) {
+    for (const { address, alias } of addresses) {
       const report = await this.getSingleAddressReport(address);
 
       if (!report) { continue; }
@@ -176,11 +176,11 @@ export default class TransactionReporter {
         if (!fullReport[date]) {
           fullReport[date] = {
             count: report[date].count,
-            reports: [ { address: address, report: report[date] } ]
+            reports: [ { address: address, alias: alias, report: report[date] } ]
           };
         } else {
           fullReport[date].count += report[date].count;
-          fullReport[date].reports.push({ address: address, report: report[date] });
+          fullReport[date].reports.push({ address: address, alias: alias, report: report[date] });
         }
       });
     }

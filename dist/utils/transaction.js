@@ -155,20 +155,20 @@ var TransactionReporter = (function () {
     };
     TransactionReporter.prototype.getFullReport = function (addresses) {
         return __awaiter(this, void 0, void 0, function () {
-            var startTime, fullReport, _loop_1, this_1, _i, addresses_1, address, endTime;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var startTime, fullReport, _loop_1, this_1, _i, addresses_1, _a, address, alias, endTime;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         startTime = new Date().getTime();
                         console.log("[SYSTEM] Started Loading Transaction Data...");
                         fullReport = {};
-                        _loop_1 = function (address) {
+                        _loop_1 = function (address, alias) {
                             var report;
-                            return __generator(this, function (_b) {
-                                switch (_b.label) {
+                            return __generator(this, function (_c) {
+                                switch (_c.label) {
                                     case 0: return [4, this_1.getSingleAddressReport(address)];
                                     case 1:
-                                        report = _b.sent();
+                                        report = _c.sent();
                                         if (!report) {
                                             return [2, "continue"];
                                         }
@@ -176,12 +176,12 @@ var TransactionReporter = (function () {
                                             if (!fullReport[date]) {
                                                 fullReport[date] = {
                                                     count: report[date].count,
-                                                    reports: [{ address: address, report: report[date] }]
+                                                    reports: [{ address: address, alias: alias, report: report[date] }]
                                                 };
                                             }
                                             else {
                                                 fullReport[date].count += report[date].count;
-                                                fullReport[date].reports.push({ address: address, report: report[date] });
+                                                fullReport[date].reports.push({ address: address, alias: alias, report: report[date] });
                                             }
                                         });
                                         return [2];
@@ -190,14 +190,14 @@ var TransactionReporter = (function () {
                         };
                         this_1 = this;
                         _i = 0, addresses_1 = addresses;
-                        _a.label = 1;
+                        _b.label = 1;
                     case 1:
                         if (!(_i < addresses_1.length)) return [3, 4];
-                        address = addresses_1[_i];
-                        return [5, _loop_1(address)];
+                        _a = addresses_1[_i], address = _a.address, alias = _a.alias;
+                        return [5, _loop_1(address, alias)];
                     case 2:
-                        _a.sent();
-                        _a.label = 3;
+                        _b.sent();
+                        _b.label = 3;
                     case 3:
                         _i++;
                         return [3, 1];

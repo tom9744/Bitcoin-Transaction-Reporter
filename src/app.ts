@@ -15,7 +15,7 @@ export default class App {
     this.walletList = wallet.walletList;
   }
 
-  static addAddress(address: string) {
+  static addAddress(address: { address: string, alias: string }) {
     this.walletList.addAddress(address);
   }
 }

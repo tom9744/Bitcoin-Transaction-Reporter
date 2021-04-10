@@ -24,6 +24,6 @@ export interface DailyTokenReport {
 export interface FullReport {
   [date: string]: {
     count: number,
-    reports: Array<{ address: string, report: DailyTokenReport }>
+    reports: Array<{ address: string, alias: string, report: DailyTokenReport }>
   } 
 }

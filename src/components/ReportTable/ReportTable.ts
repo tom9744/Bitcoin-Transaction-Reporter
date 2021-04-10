@@ -30,9 +30,10 @@ export default class ReportMaker {
         <thead>
             <tr align="center">
                 <th class="app-table--head" style="width:10%">날짜</th>
-                <th class="app-table--head" style="width:40%">지갑</th>
-                <th class="app-table--head" style="width:29%">코인</th>
-                <th class="app-table--head" style="width:10%">거래 형태</th>
+                <th class="app-table--head" style="width:10%">별명</th>
+                <th class="app-table--head" style="width:30%">지갑</th>
+                <th class="app-table--head" style="width:20%">코인</th>
+                <th class="app-table--head" style="width:10%">형태</th>
                 <th class="app-table--head" style="width:20%">거래량</th>
             </tr>
         </thead>
@@ -64,14 +65,15 @@ export default class ReportMaker {
       const dateTableCellElem = this.tableHeaderCell.generate(date, [tableClassName], tableAttrs);
       
       // 단일 일자에 대한 
-      fullReport[date].reports.forEach(({ address, report }, addressIndex) => {
+      fullReport[date].reports.forEach(({ address, alias, report }, addressIndex) => {
         const { count, changes } = report;
         
         if (count !== 0) {
           // 지갑 주소에 대한 테이블 데이터 셀을 생성한다.
           const tableAttrs = [ { key: "rowspan", value: count + "" } ];
+          const aliasTableCellElem = this.tableDataCell.generate(alias, [tableClassName], tableAttrs);
           const addressTableCellElem = this.tableDataCell.generate(address, [tableClassName], tableAttrs);
-          
+
           // 코인 이름과 거래량에 대한 테이블 데이터 셀을 생성한다.
           changes.forEach((change, changeIndex) => {
             const [ tokenSymbol, balanceChange ] = Object.entries(change)[0];
@@ -99,6 +101,7 @@ export default class ReportMaker {
               if (addressIndex === 0) {
                 cells.push(dateTableCellElem);
               }
+              cells.push(aliasTableCellElem);
               cells.push(addressTableCellElem);
             }
             cells.push(tokenTableCellElem);
@@ -121,7 +124,7 @@ export default class ReportMaker {
 
     const reporter = TransactionReporter.getInstance("desc");
     const fromLocalStorage = localStorage.getItem("addressList") || "[]"; 
-    const addressList = JSON.parse(fromLocalStorage);
+    const addressList = JSON.parse(fromLocalStorage) as { address: string, alias: string }[];
   
     const fullReport = await reporter.getFullReport(addressList);
     this.generateReport(fullReport);

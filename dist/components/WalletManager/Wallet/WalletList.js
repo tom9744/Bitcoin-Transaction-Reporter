@@ -23,16 +23,16 @@ var WalletList = (function () {
         }
     };
     WalletList.prototype.removeAddress = function (listItemElem, address) {
-        var targetIndex = this.addressList.findIndex(function (addr) { return addr === address; });
+        var targetIndex = this.addressList.findIndex(function (addr) { return addr.address === address; });
         this.unorderedList.removeChild(listItemElem);
         this.addressList.splice(targetIndex, 1);
         localStorage.setItem("addressList", JSON.stringify(this.addressList));
     };
-    WalletList.prototype.addAddress = function (address) {
-        var listItem = new WalletListItem(address);
+    WalletList.prototype.addAddress = function (newListItem) {
+        var listItem = new WalletListItem(newListItem);
         var listItemElem = listItem.render();
         this.unorderedList.appendChild(listItemElem);
-        this.addressList.push(address);
+        this.addressList.push(newListItem);
         localStorage.setItem("addressList", JSON.stringify(this.addressList));
     };
     WalletList.prototype.render = function () {

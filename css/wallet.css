@@ -4,50 +4,57 @@
   margin: 1rem 0rem;
 }
 
-.wallet--form {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.wallet--form,
+.wallet--list {
+  width: 50%;
 
-  width: 100%;
-
-  margin-bottom: .5rem;
+  margin: 0 auto;
 }
 
-.wallet--input {
-  height: 1.75rem;
-  width: 50%;
-  margin: 0px 16px;
+.wallet--input-wrapper {
+  display: flex;
+  align-items: center;
+
+  height: 2rem;
+
+  margin: .5rem 0;
+
+  font-weight: bold;
+}
+
+.wallet--input-wrapper label {
+  flex: 2;
+}
+
+.wallet--input-wrapper input {
+  flex: 8;
+
+  height: 75%;
+
+  padding-left: .5rem;
+
+  border: none;
+  border-radius: 8px;
+  outline: none;
 }
 
 .wallet--button__add {
-  border: 1px solid rgb(48, 54, 61);
+  height: 2rem;
+  width: 100%;
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  margin: 1rem 0;
+
+  border: 1px solid var(--accent-color);
   border-radius: 8px;
   outline: none;
 
-  height: 2.25rem;
-  width: 4rem;  
+  cursor: pointer;
 
-  color: rgb(201, 209, 217);
-  background-color: rgb(33, 38, 45);
-}
-
-.wallet--list {
-  list-style: none;
-
-  width: 50%;
-
-  margin: auto;
-}
-
-.wallet--listitem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.wallet--paragraph {
-  font-size: 0.9rem;
+  color: var(--text-color);
+  background-color: var(--primary-color);
 }
 
 .wallet--button__remove {
@@ -56,4 +63,37 @@
   background-color: transparent;
   cursor: pointer;
   color: rgb(255, 0, 0);
+}
+
+.wallet--list {
+  list-style: none;
+}
+
+.wallet--listitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin: .5rem 0;
+}
+
+.wallet--info {
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+}
+
+.wallet--paragraph__address,
+.wallet--paragraph__alias {
+  font-size: 0.9rem;
+}
+
+.wallet--paragraph__alias {
+  display: block;
+
+  margin-right: .5rem;
+  padding: .2rem .5rem;
+
+  background-color: rgb(34, 53, 224);
 }

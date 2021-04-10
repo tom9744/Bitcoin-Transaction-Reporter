@@ -2,7 +2,7 @@ import WalletListItem from "./WalletListItem.js";
 
 export default class WalletList {
   private unorderedList: HTMLUListElement;
-  private addressList: string[] = [];
+  private addressList: Array<{ address: string, alias: string }> = [];
 
   constructor () {
     this.unorderedList = document.createElement("ul");
@@ -14,7 +14,7 @@ export default class WalletList {
   private getItemsFromLocalStroage() {
     const savedAddressList = localStorage.getItem("addressList") || "[]";
 
-    return JSON.parse(savedAddressList) as string[]; // Javascript 배열로 변환. 
+    return JSON.parse(savedAddressList) as Array<{ address: string, alias: string }>; // Javascript 배열로 변환. 
   }
 
   private removeHandler(event: Event) {
@@ -33,19 +33,19 @@ export default class WalletList {
   }
 
   private removeAddress(listItemElem: HTMLLIElement, address: string) {
-    const targetIndex = this.addressList.findIndex(addr => addr === address);
+    const targetIndex = this.addressList.findIndex(addr => addr.address === address);
     this.unorderedList.removeChild(listItemElem);
 
     this.addressList.splice(targetIndex, 1);
     localStorage.setItem("addressList", JSON.stringify(this.addressList));
   }
 
-  public addAddress(address: string) {
-    const listItem = new WalletListItem(address);
+  public addAddress(newListItem: { address: string, alias: string }) {
+    const listItem = new WalletListItem(newListItem);
     const listItemElem = listItem.render();
     this.unorderedList.appendChild(listItemElem);
 
-    this.addressList.push(address);
+    this.addressList.push(newListItem);
     localStorage.setItem("addressList", JSON.stringify(this.addressList));
   }
 

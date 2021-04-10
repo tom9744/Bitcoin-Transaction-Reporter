@@ -46,7 +46,7 @@ var ReportMaker = (function () {
         this.paragraph = new BalanceChange();
         this.tableRows = [];
         this.reportSection = document.querySelector(".report");
-        this.reportSection.innerHTML = "\n      <button class=\"report--button__abled\">\uBCF4\uACE0\uC11C \uBC1B\uAE30</button>\n\n      <em class=\"report--notice\">\uC0C8\uB85C\uACE0\uCE68 \uD558\uC2DC\uBA74 \uBCF4\uACE0\uC11C\uAC00 \uCD08\uAE30\uD654\uB429\uB2C8\uB2E4...!</em>\n\n      <table\n        class=\"app-table\"\n        width=\"50%\"\n        height=\"200\"\n        cellspacing=\"5\"\n        border=\"1\"\n      >\n        <thead>\n            <tr align=\"center\">\n                <th class=\"app-table--head\" style=\"width:10%\">\uB0A0\uC9DC</th>\n                <th class=\"app-table--head\" style=\"width:40%\">\uC9C0\uAC11</th>\n                <th class=\"app-table--head\" style=\"width:29%\">\uCF54\uC778</th>\n                <th class=\"app-table--head\" style=\"width:10%\">\uAC70\uB798 \uD615\uD0DC</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uAC70\uB798\uB7C9</th>\n            </tr>\n        </thead>\n\n        <tbody id=\"tbody\" class=\"table--body\">\n        </tbody>\n      </table>\n    ";
+        this.reportSection.innerHTML = "\n      <button class=\"report--button__abled\">\uBCF4\uACE0\uC11C \uBC1B\uAE30</button>\n\n      <em class=\"report--notice\">\uC0C8\uB85C\uACE0\uCE68 \uD558\uC2DC\uBA74 \uBCF4\uACE0\uC11C\uAC00 \uCD08\uAE30\uD654\uB429\uB2C8\uB2E4...!</em>\n\n      <table\n        class=\"app-table\"\n        width=\"50%\"\n        height=\"200\"\n        cellspacing=\"5\"\n        border=\"1\"\n      >\n        <thead>\n            <tr align=\"center\">\n                <th class=\"app-table--head\" style=\"width:10%\">\uB0A0\uC9DC</th>\n                <th class=\"app-table--head\" style=\"width:10%\">\uBCC4\uBA85</th>\n                <th class=\"app-table--head\" style=\"width:30%\">\uC9C0\uAC11</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uCF54\uC778</th>\n                <th class=\"app-table--head\" style=\"width:10%\">\uD615\uD0DC</th>\n                <th class=\"app-table--head\" style=\"width:20%\">\uAC70\uB798\uB7C9</th>\n            </tr>\n        </thead>\n\n        <tbody id=\"tbody\" class=\"table--body\">\n        </tbody>\n      </table>\n    ";
         var reportGenerateButton = this.reportSection.querySelector(".report--button__abled");
         reportGenerateButton.addEventListener("click", this.generateReportHandler.bind(this));
     }
@@ -65,10 +65,11 @@ var ReportMaker = (function () {
             var tableAttrs = [{ key: "rowspan", value: fullReport[date].count + "" }];
             var dateTableCellElem = _this.tableHeaderCell.generate(date, [tableClassName], tableAttrs);
             fullReport[date].reports.forEach(function (_a, addressIndex) {
-                var address = _a.address, report = _a.report;
+                var address = _a.address, alias = _a.alias, report = _a.report;
                 var count = report.count, changes = report.changes;
                 if (count !== 0) {
                     var tableAttrs_1 = [{ key: "rowspan", value: count + "" }];
+                    var aliasTableCellElem_1 = _this.tableDataCell.generate(alias, [tableClassName], tableAttrs_1);
                     var addressTableCellElem_1 = _this.tableDataCell.generate(address, [tableClassName], tableAttrs_1);
                     changes.forEach(function (change, changeIndex) {
                         var _a = Object.entries(change)[0], tokenSymbol = _a[0], balanceChange = _a[1];
@@ -90,6 +91,7 @@ var ReportMaker = (function () {
                             if (addressIndex === 0) {
                                 cells.push(dateTableCellElem);
                             }
+                            cells.push(aliasTableCellElem_1);
                             cells.push(addressTableCellElem_1);
                         }
                         cells.push(tokenTableCellElem);

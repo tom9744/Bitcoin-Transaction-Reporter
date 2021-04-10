@@ -1,7 +1,7 @@
 export default class WalletListItem {
-  private address: string;
+  private address: { address: string, alias: string };
 
-  constructor(address: string) {
+  constructor(address: { address: string, alias: string }) {
     this.address = address;
   }
 
@@ -9,7 +9,11 @@ export default class WalletListItem {
     const walletListItemElem = document.createElement("li");
     walletListItemElem.className = "wallet--listitem";
     walletListItemElem.innerHTML = `
-      <p class="wallet--paragraph">${this.address}</p>
+      <div class="wallet--info">
+        <p class="wallet--paragraph__alias">${this.address.alias}</p>
+        <p class="wallet--paragraph__address">${this.address.address}</p>
+      </div>
+
       <button class="wallet--button__remove">𝗫</button>
     `;
 
